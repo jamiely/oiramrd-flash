@@ -1,0 +1,153 @@
+function BlockMatcher(game) {
+    trace("creating blockmatcher");
+    this.game = game;
+    this.searchGrid = null;
+    this.contactPointHash = {};
+    this.contactPoints = new Array();
+    this.debug = true;
+    
+    this.trace = function ( msg ) {
+        if ( this.debug ) trace( msg ) ;
+        
+    }
+    
+    this.setMatched = function() {
+        this.trace ( "BlockMatched.setMatched: Begin" );
+        
+        var directions = new Array(SB_NORTH, SB_SOUTH, SB_EAST, SB_WEST);
+        var cp, d, neighbor, target;
+        for ( var i = 0; i < this.contactPoints.length; i ++ ) {
+            cp = this.contactPoints [ i ];
+            this.trace ("\tBlockMatched.setMatched: contactPoint = " + cp ) ;
+            
+            target = this.searchGrid [ cp.x ] [ cp.y ];
+            this.trace ("\tBlockMatched.setMatched: target = " + target );
+            
+            
+            for ( var j = 0; j < directions.length; j ++ ) {
+                d = directions[j];
+                this.trace ("\BlockMatched.setMatched: Direction = " + d );
+                
+                matches = new Array();
+                
+                neighbor = target;
+                
+                while ( neighbor ) {
+                    neighbor = this.getNeighboringBlock ( neighbor, d );
+                    
+                    
+                    // must not be null
+                    if ( ! neighbor ) continue;
+                    
+                    this.trace ("\BlockMatched.setMatched: Neighbor = " + neighbor );
+                    
+                    // must not have already been searched
+                    if ( neighbor.searched [ d ] ) continue;
+                    // must be the same color
+                    else if ( neighbor.block.colorIndex != target.block.colorIndex ) continue;
+                    // must not have been matched.  
+                    // theoretically, would never reach here, b/c if matched, then searched.
+                    else if ( neighbor.block.matched ) continue;
+                    
+                    // already searched in this direction
+                    neighbor.searched [ d ] = true;
+                    matches.push ( neighbor );
+                }
+                
+                matches.push ( target );
+                
+                this.trace ("\BlockMatched.setMatched: # matches = " + matches.length );
+                
+                if ( matches.length >= this.game.minimumBlocksToClear ) {
+                    this.trace ("\BlockMatched.setMatched: setting blocks as matched:\n" + matches.join("\n"));
+                    for ( var k = 0 ; k < matches.length; k ++ ) {
+                        matches[k].matched = true;
+                    }
+                }
+                else {
+                    // did not meet minimum, do nothing
+                    
+                }
+                
+            }
+        }
+    }
+    
+    this.getMatchedPoints = function () {
+        this.trace ( "BlockMatcher.getMatchedPoints: Begin" );
+        var matched = new Array();
+        
+        for(var i=0; i < this.game.width; i ++ ) {
+            for ( var j=0; j < this.game.height; j++ ) {
+                if ( this.searchGrid[i][j].matched ) 
+                    matched.push ( this.searchGrid[i][j] );
+            }
+        }
+        
+        return matched;
+    }
+    
+    /**
+            * Returns a block from searchGrid
+            */
+    this.getNeighboringBlock = function ( targetBlock, dir ) {
+        var pt = targetBlock.block ? targetBlock.block.position : targetBlock.position,
+            x = pt.x,
+            y = pt.y;
+        
+        
+        switch ( dir ) {
+            case SB_NORTH:
+                y--;
+                break;
+            case SB_SOUTH:
+                y++;
+                break;
+            case SB_EAST:
+                x++;
+                break;
+            case SB_WEST:
+                x--;
+                break;
+        }
+        
+        // check bounds
+        if ( x >= 0 && x < this.game.width && y >= 0 && y < this.game.height )
+            return this.searchGrid[x][y];
+            
+        return null;
+    }
+    
+    this.addContactPoint = function( pt ) { 
+        // hash guarantees unqiue points
+        
+        if ( ! this.contactPointHash [ pt.toString() ] ) {
+            this.contactPoints.push ( pt );
+            // need some marker, does not have to be true
+            this.contactPointHash [ pt.toString() ] = true;
+        }
+    }
+    
+    this.buildSearchGrid = function() {
+        this.searchGrid = new Array(this.game.width);
+        for(var i=0; i < this.game.width; i++) {
+            this.searchGrid[i] = new Array(this.game.height);
+        }
+        
+        for(var i=0; i < this.game.width; i ++ ) {
+            for ( var j=0; j < this.game.height; j++ ) {
+                this.searchGrid[i][j] = new SearchedBlock ( this.game.getBlock ( i, j ) );
+            }
+        }
+    }
+ 
+    this.getContactPoints = function() {
+    
+        return this.contactPoints;
+    }
+    /**/
+    
+    this.toString = function () {
+        return "block matcher";
+    }
+}
