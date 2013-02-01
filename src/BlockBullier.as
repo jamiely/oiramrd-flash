@@ -9,7 +9,7 @@ function BlockBullier() {
         game.board[x][y] = BRD_EMPTY;
         game.mcs[x][y] = null;
         
-        trace(this + ": Reseting Position of " + blk);
+        //trace(this + ": Reseting Position of " + blk);
     }
     this.down = function(game, blk) {
         this.resetpos(game, blk);
@@ -32,6 +32,6 @@ function BlockBullier() {
         game.board[x][y] = BRD_BLOCK;
         game.mcs[x][y] = blk;
         
-        trace(this + ": Updating " + blk);
+        //trace(this + ": Updating " + blk);
     }
 }

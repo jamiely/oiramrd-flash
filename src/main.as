@@ -1,29 +1,38 @@
 #include "Oiramrd.as"
 
-// oiramrd.as
-_root.createEmptyMovieClip("game", 10);
-trace(this + ": Created empty movie clip for game.")
 
-OIRAMRD = new Oiramrd(10, 20);
-trace(this + ": Created game object.");
-INTERFACE = new Interface(OIRAMRD); 
+function gameStart() {
+    // oiramrd.as
+    _root.createEmptyMovieClip("game", 10);
+    trace(this + ": Created empty movie clip for game.")
 
-DISPLAY = new Display(OIRAMRD, _root.game);
-trace(this + ": Created display object.");
-_root.game._x = 55;
-_root.game._y = 105;
+    OIRAMRD = new Oiramrd(10, 20);
+    trace(this + ": Created game object.");
+    INTERFACE = new Interface(OIRAMRD); 
 
-DISPLAY.initialize();
-trace(this + ": Initialized display object.");
+    DISPLAY = new Display(OIRAMRD, _root.game);
+    trace(this + ": Created display object.");
+    _root.game._x = 85;
+    _root.game._y = 175;
 
-trace(this + ": BF = " + BF);
-BF.mc = DISPLAY.blocks;
+    DISPLAY.initialize();
+    trace(this + ": Initialized display object.");
 
-OIRAMRD.viriiFill(.1);
-OIRAMRD.setScore( 0 );
-clock = 0;
-this.onEnterFrame = function() {
-    this.clock ++;    
+    trace(this + ": BF = " + BF);
+    BF.mc = DISPLAY.blocks;
+
+    OIRAMRD.viriiFill(.01);
     
-    if ( this.clock % OIRAMRD.ticksPerStep == 0 )  OIRAMRD.applyGravity();
+    OIRAMRD.setScore( 0 );
+    clock = 0;
+    
+    DISPLAY.setLevel(1);
+    
+    this.onEnterFrame = function() {
+        this.clock ++;    
+        
+        if ( this.clock % OIRAMRD.ticksPerStep == 0 )  OIRAMRD.applyGravity();
+    }
 }
+
+gameStart();

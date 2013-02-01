@@ -14,24 +14,25 @@ Interface.prototype.onKeyDown = function() {
     
     switch ( Key.getAscii() ) {
         case "g".charCodeAt(0):
-            this.game.step();
-            trace(this + ": stepped!");
-            break;
+            // this.game.step();
+            // trace(this + ": stepped!");
+            // break;
         case "n".charCodeAt(0):
-            trace("Game = " + this.game);
-            this.game.insertNextPill();
-            trace(this + ": inserted new myPill");
+            // trace("Game = " + this.game);
+            // this.game.insertNextPill();
+            // trace(this + ": inserted new myPill");
+            //gameStart();
             break;
-        case "f".charCodeAt(0):
-            trace("Virii fill");
-            this.game.viriiFill(.1);
-            break;
+        // case "f".charCodeAt(0):
+            // trace("Virii fill");
+            // this.game.viriiFill(.1);
+            // break;
         case "d".charCodeAt(0):
-            trace("dump board");
-            this.game.dumpBoard();
-            var bm = new BlockMatcher(this.game);
-            bm.buildSearchGrid();
-            bm.dumpBoard();
+            // trace("dump board");
+            // this.game.dumpBoard();
+            // var bm = new BlockMatcher(this.game);
+            // bm.buildSearchGrid();
+            // bm.dumpBoard();
             
             break;
         case "z".charCodeAt(0):
@@ -73,6 +74,9 @@ Interface.prototype.onKeyDown = function() {
                 // trace(this + ": KeyDown LEFT");
             // }
             // break;
+        case Key.Down:
+            this.game.step(); // alternate down
+            break;
         case Key.UP:
             trace ( "\tkey=up ap=" + ap );
             if ( this.game.canRotate(ap, true) ) {

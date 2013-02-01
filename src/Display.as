@@ -16,7 +16,7 @@ function Display(game, root) {
 
 Display.prototype.updatePill = function(pill) {
     this.updateBlock(pill.block1); this.updateBlock(pill.block2);
-    trace(this + ": updatePill pill = " + pill);
+    //trace(this + ": updatePill pill = " + pill);
 }
 
 Display.prototype.updateBlock = function(blk) {
@@ -25,7 +25,7 @@ Display.prototype.updateBlock = function(blk) {
     b._x = this.blockSize.x * blk.position.x - this.width;
     b._y = this.blockSize.y * blk.position.y - this.height;
     n = new Point(b._x, b._y);
-    trace(this + ": updateBlock blk = " + blk + " original = " + o +  " new = " + n);
+    //trace(this + ": updateBlock blk = " + blk + " original = " + o +  " new = " + n);
 }
 
 Display.prototype.addPillToBoard = function(pill) {
@@ -138,7 +138,7 @@ Display.prototype.initialize = function() {
     
     this.textfields.createTextField("lblViriiLeft",2,this.left,-160,50,50);
     with ( this.textfields.lblViriiLeft ) {
-        text = "Virri #"
+        text = "Bugs #"
         setTextFormat( new TextFormat("_sans", 10) );
         
     }    
@@ -158,7 +158,28 @@ Display.prototype.initialize = function() {
         this.setScore ( "?" );
         setTextFormat(this.myformat);
     }
+    
+    this.textfields.createTextField("lblLevel",5,this.left,-70,50,50);
+    with ( this.textfields.lblLevel ) {
+        text = "level"
+        setTextFormat( new TextFormat("_sans", 10) );
+    }    
+    
+    this.textfields.createTextField("level",6,this.left,-60,50,50);
+    with ( this.textfields.level ) {
+        autoSize = true;
+        //this.setLevel( 0 );
+        setTextFormat(this.myformat);
+    }    
 }
+
+Display.prototype.setLevel = function(level) {
+    with ( this.textfields.level ) {
+        text = level;
+        setTextFormat( this.myformat );
+    }
+}
+
 
 Display.prototype.setScore = function(score) {
     with ( this.textfields.score ) {
