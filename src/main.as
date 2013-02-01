@@ -19,29 +19,10 @@ trace(this + ": Initialized display object.");
 trace(this + ": BF = " + BF);
 BF.mc = DISPLAY.blocks;
 
-// myPill = new Pill(
-    // new Block(new Point(1, 1), 1, null),
-    // new Block(new Point(1, 2), 1, null))
-    
-// trace(myPill)
-
-// cpy = myPill.copy();
-// cpy.block1.position.x = 10;
-
-// trace(myPill);
-// trace(cpy);
-
-
-// myBlk = new Pill(new Block(new Point(1, 1), 1, null));
-// cpy = myBlk.copy();
-// cpy.position.x = 10;
-
-// trace(myBlk);
-// trace(cpy);
 
 clock = 0;
 this.onEnterFrame = function() {
     this.clock ++;    
-    if ( this.clock % 6 == 0 ) 
-        OIRARMD.applyGravity();
+    //if ( this.clock % 6 == 0 ) 
+    //    OIRARMD.applyGravity();
 }

@@ -1,3 +1,5 @@
+
+#include "constants.as"
 #include "../Point.as" 
 #include "Interface.as"
 
@@ -14,18 +16,6 @@
 #include "BlockMatcher.as"
 #include "SearchedBlock.as"
 
-BRD_EMPTY = 0;
-BRD_VIRUS = 1;
-BRD_BLOCK = 2;
-
-/*
- * directional constants
- */
- 
-DIR_UP = 1;
-DIR_RIGHT = 3;
-DIR_DOWN = 5;
-DIR_LEFT = 7;
 
 /**
  * This is the main class
@@ -43,10 +33,6 @@ function Oiramrd(width, height) {
         
         this.board[i] = new Array(height);
         this.mcs[i] = new Array(height);
-        
-        //for(var j=0; j<height; j++) {
-        //    this.board[i].push(EMPTY);
-        //}
     }
             
     this.initialize();
@@ -86,26 +72,6 @@ Oiramrd.prototype.initialize = function() {
 Oiramrd.prototype.dumpBoard = function(tab) {
     str = ""
     if ( tab == undefined ) tab = ""
-    //for( var i = this.board.length-1; i >= 0; i --) { 
-    // for ( i=0; i < this.board.length; i++ ) {
-        // str = str + tab;
-        // for ( var j = 0; j < this.board[i].length; j++) {
-            // char = this.board[j][i];
-            // if ( char == BRD_EMPTY ) char = ".";
-            // else if (char == BRD_VIRUS) char = "";
-            // else if (char == BRD_BLOCK) char = "#";
-            // str = str + char;
-        // }
-        // str = str + "\n";
-    // }
-    //for( var i = this.board.length-1; i >= 0; i --) { 
-    // for ( i=0; i < this.board.length; i++ ) {
-        // str = str + tab;
-        // for ( var j = 0; j < this.board[i].length; j++) {
-            // str = str + this.board[i][j];
-        // }
-        // str = str + "\n";
-    // }
     for ( var j = 0; j < this.height; j++) {
         str = str + tab;
         for ( i=0; i < this.width; i++ ) {
@@ -150,7 +116,8 @@ Oiramrd.prototype.viriiFill = function(density) {
         if ( pos.y >= midy ) { // fill below midpoint of board
             
             
-            ci = Math.random() * SETTINGS.pillColorCount();
+            ci = Math.floor(Math.random() * SETTINGS.pillColorCount());
+            trace ( ci );
             if ( pos == null ) return;
             virus = vf.getVirus(pos, ci);
             
@@ -330,54 +297,32 @@ Oiramrd.prototype.applyGravity = function() {
                 }
                 else {
                     blk = this.mcs[x][y];
-                    
-                    // if ( blk.linkedBlock == null ) {
-                        bb = new BlockBullier();
-                        if ( ! blk.grav ) {
-                            bb.down(this, blk);
-                            blk.grav = true;
-                            this.display.updateBlock(blk);
-                            trace(this + ": Moving block " + blk);
+                    bb = new BlockBullier();
+                    if ( ! blk.grav ) {
+                        bb.down(this, blk);
+                        blk.grav = true;
+                        this.display.updateBlock(blk);
+                        trace(this + ": Moving block " + blk);
+                        
+                        // block has fallen, it becomes a contact point if there are any blocks in the cardinal positions
+                        // if ( blk has neighbors and is not falling) 
+                        this.blockMatcher.addContactPoint ( blk.position );
+                        
+                        numberOfBlocksFallen ++;
+                        
+                        if ( blk.linkedBlock != undefined and ! blk.linkedBlock.grav) {
+                            bb.down(this, blk.linkedBlock);
+                            blk.linkedBlock.grav = true;
                             
-                            // block has fallen, it becomes a contact point if there are any blocks in the cardinal positions
-                            // if ( blk has neighbors and is not falling) 
-                            this.blockMatcher.addContactPoint ( blk.position );
+                            // if ( blk has neighbors and is at rest)
+                            this.blockMatcher.addContactPoint ( blk.linkedBlock.position );
+                            this.display.updateBlock(blk.linkedBlock);
+                            trace(this + ": Moving block " + blk.linkedBlock);
                             
                             numberOfBlocksFallen ++;
-                            
-                            if ( blk.linkedBlock != undefined and ! blk.linkedBlock.grav) {
-                                bb.down(this, blk.linkedBlock);
-                                blk.linkedBlock.grav = true;
-                                
-                                // if ( blk has neighbors and is at rest)
-                                this.blockMatcher.addContactPoint ( blk.linkedBlock.position );
-                                this.display.updateBlock(blk.linkedBlock);
-                                trace(this + ": Moving block " + blk.linkedBlock);
-                                
-                                numberOfBlocksFallen ++;
-                            }
-
                         }
-                        
-                                                
-                        
-                        
-                    // } 
-                    // doesn't work for some reason
-                    // else {
-                        // pp = new PillPusher();
-                        // trace(pp + " " + blk + " " + blk.linkedBlock);
-                        // p = new Pill(blk, blk.linkedBlock);
-                        // trace("BLAH myPill= " + p);
-                        // pp.down(this, p);
-                    // }
-                    
-                    // bugs with this
-                    // if ( blk.linkedBlock != null ) { 
-                        // bb.down(this, blk.linkedBlock);
-                        // display.updateBlock(blk.linkedBlock);
-                    // }
-                    
+
+                    }                    
                 }
             }
         }
@@ -403,6 +348,9 @@ Oiramrd.prototype.applyGravity = function() {
             } else {
                 trace("no matches");
             }
+            
+            trace("Block Matcher Board");
+            this.blockMatcher.dumpBoard();
             
             this.blockMatcher = new BlockMatcher ( this ); // reset
         }
@@ -481,8 +429,8 @@ Oiramrd.prototype.setMcsPos = function(pos, val) {
 }
 
 Oiramrd.prototype.setPill = function(myPill) {
-    p1 = myPill.block1.position;
-    p2 = myPill.block2.position;
+    var p1 = myPill.block1.position;
+    var p2 = myPill.block2.position;
     this.setBoardPos(p1, BRD_BLOCK);
     this.setBoardPos(p2, BRD_BLOCK);
     this.setMcsPos(p1, myPill.block1);
@@ -490,7 +438,7 @@ Oiramrd.prototype.setPill = function(myPill) {
 }
 
 Oiramrd.prototype.setVirus = function(virus) {
-    p = virus.position;
+    var p = virus.position;
     this.setBoardPos(p, BRD_VIRUS);
     this.setMcsPos(p, virus);
 }
@@ -508,6 +456,7 @@ Oiramrd.prototype.addPillToBoard = function(myPill) {
 }
 
 Oiramrd.prototype.getBlock = function ( x, y ) {
+    if ( this.mcs.length <= x || x < 0 || this.mcs[x].length <= y || y < 0 ) return null;
     return this.mcs[x][y];
 }
 
@@ -521,5 +470,7 @@ Oiramrd.prototype.destroyBlock = function ( x, y ) {
     this.mcs[x][y] = null;
     block.mc.removeMovieClip();
 }
+
+
 
 BF = new BlockFactory();

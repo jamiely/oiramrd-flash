@@ -14,7 +14,7 @@ function BlockMatcher(game) {
     this.setMatched = function() {
         this.trace ( "BlockMatched.setMatched: Begin" );
         
-        var directions = new Array(SB_NORTH, SB_SOUTH, SB_EAST, SB_WEST);
+        var directions = new Array(DIR_UP, DIR_LEFT);
         var cp, d, neighbor, target;
         for ( var i = 0; i < this.contactPoints.length; i ++ ) {
             cp = this.contactPoints [ i ];
@@ -53,6 +53,42 @@ function BlockMatcher(game) {
                     neighbor.searched [ d ] = true;
                     matches.push ( neighbor );
                 }
+                
+                
+                d = getOppositeDirection( d );
+                this.trace ("\BlockMatched.setMatched: Direction = " + d );
+                
+                
+                neighbor = target;
+                
+                while ( neighbor ) {
+                    neighbor = this.getNeighboringBlock ( neighbor, d );
+                    
+                    
+                    // must not be null
+                    if ( ! neighbor ) continue;
+                    
+                    this.trace ("\BlockMatched.setMatched: Neighbor = " + neighbor );
+                    
+                    // must not have already been searched
+                    if ( neighbor.searched [ d ] ) continue;
+                    // must be the same color
+                    else if ( neighbor.block.colorIndex != target.block.colorIndex ) continue;
+                    // must not have been matched.  
+                    // theoretically, would never reach here, b/c if matched, then searched.
+                    else if ( neighbor.block.matched ) continue;
+                    
+                    // already searched in this direction
+                    neighbor.searched [ d ] = true;
+                    matches.push ( neighbor );
+                }
+                
+                
+                
+                
+                
+                
+                
                 
                 matches.push ( target );
                 
@@ -97,18 +133,20 @@ function BlockMatcher(game) {
         
         
         switch ( dir ) {
-            case SB_NORTH:
+            case DIR_UP:
                 y--;
                 break;
-            case SB_SOUTH:
+            case DIR_DOWN:
                 y++;
                 break;
-            case SB_EAST:
+            case DIR_RIGHT:
                 x++;
                 break;
-            case SB_WEST:
+            case DIR_LEFT:
                 x--;
                 break;
+            default:
+                return null;
         }
         
         // check bounds
@@ -140,6 +178,23 @@ function BlockMatcher(game) {
             }
         }
     }
+    
+    this.dumpBoard = function(tab) {
+        str = ""
+        if ( tab == undefined ) tab = ""
+        
+        for ( var j = 0; j < this.game.height; j++) {
+            str = str + tab;
+            for ( i=0; i < this.game.width; i++ ) {
+                chr = this.searchGrid[i][j].block ? this.searchGrid[i][j].block.colorIndex : ".";
+                str = str + chr;
+            }
+            str = str + "\n";
+        }
+        
+        trace(str);
+    }
+
  
     this.getContactPoints = function() {
     

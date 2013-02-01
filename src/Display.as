@@ -61,6 +61,8 @@ Display.prototype.addVirusToBoard = function(virus) {
     blk = this.virus._parent[nm];
     virus.mc = blk; // link the mc to the virus object for easy reference later
     
+    myColor = new Color( blk );
+    myColor.setRGB ( SETTINGS.pillColors [ virus.colorIndex ] ); 
     
     this.virusdepth ++; 
     
@@ -184,7 +186,7 @@ Display.prototype.initBlock = function() {
         this.block._x = 40;
         with ( this.block ) {
             lineStyle(1, 0x0000FF, 100);
-            beginFill(0x0000FF);
+            beginFill(0xFFFFFF);
             w = this.blockSize.x / 2;
             h = this.blockSize.y / 2;
             moveTo(-w, -h);
@@ -209,11 +211,13 @@ Display.prototype.initVirus = function() {
             w = this.blockSize.x / 2;
             h = this.blockSize.y / 2;
             
+            beginFill(0xFFFFFF);
             moveTo(0, h);
             curveTo(w, h, w, 0);
             curveTo(w, -h, 0, -h);
             curveTo(-w, -h, -w, 0);
             curveTo(-w, h, 0, h);
+            endFill();
         }
         
         this.virus._visible = false;
