@@ -73,7 +73,7 @@ function BlockMatcher(game) {
                     // must not have already been searched
                     if ( neighbor.searched [ d ] ) continue;
                     // must be the same color
-                    else if ( neighbor.block.colorIndex != target.block.colorIndex ) continue;
+                    else if ( neighbor.block.colorIndex != target.block.colorIndex ) break;
                     // must not have been matched.  
                     // theoretically, would never reach here, b/c if matched, then searched.
                     else if ( neighbor.block.matched ) continue;
