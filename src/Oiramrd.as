@@ -30,7 +30,7 @@ function Oiramrd(width, height) {
     this.viriiCount = 0;
     this.density = 0;
     this.level = 1;
-    
+    this.gameIsOver = false;
     
     
     
@@ -428,7 +428,7 @@ Oiramrd.prototype.applyGravity = function() {
  * Tests whther the game is over.
  */
 Oiramrd.prototype.isGameOver = function() { 
-    return false;
+    return this.gameIsOver ;
 }
 
 /**
@@ -468,6 +468,11 @@ Oiramrd.prototype.canMove = function ( myPill, dir ) {
 
 Oiramrd.prototype.insertNextPill = function(pos1) {
     //trace("insertNextPill begin");
+    
+    if (this.gameIsOver || this.getBlock (1, 1) || this.getBlock (2, 1) ) {
+        this.gameIsOver = true;
+        return;
+    }
     
     if ( pos1 == undefined ) pos1 = new Point(1, 1);
     
