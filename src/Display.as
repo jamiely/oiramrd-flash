@@ -4,7 +4,9 @@ function Display(game, root) {
     this.root = root; // the root mc of the game
     this.updatePositions = new Array();
     
-    
+    this.sound = new Sound(root);
+    this.sound.attachSound("sound_beep");
+    //this.sound.loadSound("sounds/beep.mp3", false);
     trace( "Display: Root = " + root);
     
     this.toString = function () {
@@ -72,6 +74,7 @@ Display.prototype.addVirusToBoard = function(virus) {
 Display.prototype.initialize = function() {
     // 
     
+    
     this.root.createEmptyMovieClip("origin", 20);
     this.origin = this.root.origin;
     
@@ -93,7 +96,7 @@ Display.prototype.initialize = function() {
     
     
     
-    this.blockSize = new Point(10, 10);
+    this.blockSize = new Point(15, 15);
     this.width = this.game.width * this.blockSize.x /2 ;
     this.height = this.game.height * this.blockSize.y / 2;
     
@@ -107,10 +110,66 @@ Display.prototype.initialize = function() {
     
     trace ( "Display: Board Drawn" );
     
-    this.drawOrigin();
+    //this.drawOrigin();
     this.drawGrid();
     
     
+    this.root.createEmptyMovieClip("textfields", 10);
+    this.textfields = this.root.textfields;
+    
+    this.left = 70;
+    
+    this.textfields.createTextField("viriiLeft",1,this.left,-150,50,50);
+    //trace(this.textfields.viriiLeft);
+    // this.textfields.viriiLeft.multiline = true;
+    // this.textfields.viriiLeft.wordWrap = true;
+    // this.textfields.viriiLeft.border = true;
+    this.textfields.viriiLeft.autoSize = true;
+    
+    this.myformat = new TextFormat();
+    this.myformat.color = 0x000000;
+    this.myformat.font = "_sans";
+    this.myformat.bold = true;
+    this.myformat.size = 20;
+    
+
+    this.textfields.viriiLeft.text = "?";
+    this.textfields.viriiLeft.setTextFormat(this.myformat);
+    
+    this.textfields.createTextField("lblViriiLeft",2,this.left,-160,50,50);
+    with ( this.textfields.lblViriiLeft ) {
+        text = "Virri #"
+        setTextFormat( new TextFormat("_sans", 10) );
+        
+    }    
+    
+    this.textfields.createTextField("lblScore",3,this.left,-110,50,50);
+    with ( this.textfields.lblScore ) {
+        text = "Score"
+        setTextFormat( new TextFormat("_sans", 10) );
+        
+    }    
+    
+    this.setViriiCount ( "?" );
+    
+    this.textfields.createTextField("score",4,this.left,-100,50,50);
+    with ( this.textfields.score ) {
+        autoSize = true;
+        this.setScore ( "?" );
+        setTextFormat(this.myformat);
+    }
+}
+
+Display.prototype.setScore = function(score) {
+    with ( this.textfields.score ) {
+        text = score;
+        setTextFormat( this.myformat );
+    }
+}
+
+Display.prototype.setViriiCount = function(count) {
+    this.textfields.viriiLeft.text = count;
+    this.textfields.viriiLeft.setTextFormat( this.myformat );
 }
 
 Display.prototype.drawGrid = function() {
@@ -150,7 +209,7 @@ Display.prototype.drawOrigin = function() {
 Display.prototype.drawBoard = function() {
     bg = this.boardbg;
     bw = 1; // border width
-    bc = 0x00FF00; // border color
+    bc = 0x333333; // border color
     bg.lineStyle(bw, bc, 80);
     w = this.width ; h = this.height;
     dw = this.blockSize.x/2; dh = this.blockSize.y/2;

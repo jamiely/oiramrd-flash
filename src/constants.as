@@ -6,6 +6,10 @@ BRD_EMPTY = 0;
 BRD_VIRUS = 1;
 BRD_BLOCK = 2;
 
+
+DEFAULT_TICKSPERSTEP = 5;
+
+
 /*
  * directional constants
  */

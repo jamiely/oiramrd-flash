@@ -29,6 +29,16 @@ Interface.prototype.onKeyDown = function() {
         case "d".charCodeAt(0):
             trace("dump board");
             this.game.dumpBoard();
+            var bm = new BlockMatcher(this.game);
+            bm.buildSearchGrid();
+            bm.dumpBoard();
+            
+            break;
+        case "z".charCodeAt(0):
+            if ( this.game.canRotate(ap, true) ){
+                pp.counterClockwise(this.game, ap);
+                this.game.display.updatePill ( ap );
+            }
             break;
             
     }
@@ -55,13 +65,14 @@ Interface.prototype.onKeyDown = function() {
                 trace(this + ": KeyDown LEFT");
             }
             break;
-        case Key.DOWN:
-            if ( this.game.canMove ( ap, DIR_DOWN ) ) {
-                pp.down(this.game, ap);
-                this.game.display.updatePill(ap);
-                trace(this + ": KeyDown LEFT");
-            }
-            break;
+        // does not work properly
+        // case Key.DOWN:
+            // if ( this.game.canMove ( ap, DIR_DOWN ) ) {
+                // pp.down(this.game, ap);
+                // this.game.display.updatePill(ap);
+                // trace(this + ": KeyDown LEFT");
+            // }
+            // break;
         case Key.UP:
             trace ( "\tkey=up ap=" + ap );
             if ( this.game.canRotate(ap, true) ) {
@@ -70,6 +81,12 @@ Interface.prototype.onKeyDown = function() {
                 trace ( this + ": KeyDown UP" );
             }
             
+            break;
+        case Key.CTRL:
+            if ( this.game.canRotate(ap, true) ){
+                pp.counterClockwise(this.game, ap);
+                this.game.display.updatePill ( ap );
+            }
             break;
     }
 }

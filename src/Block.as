@@ -15,6 +15,14 @@ function Block(position, colorIndex, mc) {
         if( b != null) b.linkedBlock = this;
     }
     
+    this.breakLinks = function() {
+        if ( this.linkedBlock ) {
+            this.linkedBlock.linkedBlock = null; 
+            this.linkedBlock = null;
+        }
+        
+    }
+    
     this.toString = function() {
         tmp = new Array("Block", this.position, this.mc, this.colorIndex);
         return "<" + tmp.join(" ") + ">";

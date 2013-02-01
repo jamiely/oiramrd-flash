@@ -17,7 +17,7 @@ function BlockMatcher(game) {
         var directions = new Array(DIR_UP, DIR_LEFT);
         var cp, d, neighbor, target;
         for ( var i = 0; i < this.contactPoints.length; i ++ ) {
-            cp = this.contactPoints [ i ];
+            cp = this.contactPoints [ i ].position;
             this.trace ("\tBlockMatched.setMatched: contactPoint = " + cp ) ;
             
             target = this.searchGrid [ cp.x ] [ cp.y ];
@@ -98,7 +98,11 @@ function BlockMatcher(game) {
                     this.trace ("\BlockMatched.setMatched: setting blocks as matched:\n" + matches.join("\n"));
                     for ( var k = 0 ; k < matches.length; k ++ ) {
                         matches[k].matched = true;
+                        
+                        
                     }
+                    trace ( "ATTEMPTING TO ADD TO SCORE ");
+                    this.game.addToScore ( matches.length, this.game.chainLevel );
                 }
                 else {
                     // did not meet minimum, do nothing
@@ -156,13 +160,13 @@ function BlockMatcher(game) {
         return null;
     }
     
-    this.addContactPoint = function( pt ) { 
+    this.addContactBlock = function( blk ) { 
         // hash guarantees unqiue points
         
-        if ( ! this.contactPointHash [ pt.toString() ] ) {
-            this.contactPoints.push ( pt );
+        if ( ! this.contactPointHash [ blk.mc._target ] ) {
+            this.contactPoints.push ( blk );
             // need some marker, does not have to be true
-            this.contactPointHash [ pt.toString() ] = true;
+            this.contactPointHash [ blk.mc._target ] = true;
         }
     }
     
@@ -196,8 +200,7 @@ function BlockMatcher(game) {
     }
 
  
-    this.getContactPoints = function() {
-    
+    this.getContactBlocks = function() {    
         return this.contactPoints;
     }
     /**/

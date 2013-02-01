@@ -26,9 +26,15 @@ function Oiramrd(width, height) {
     this.mcs = new Array(height);
     this.blockMatcher = undefined;
     this.minimumBlocksToClear = 4;
+    this.ticksPerStep = DEFAULT_TICKSPERSTEP ;
+    this.viriiCount = 0;
     
     this.width = width;
     this.height = height; 
+    
+    this.score = 0;
+    this.chainLevel = 1; // multiplier for score
+    
     for(var i=0; i < width; i++) {
         
         this.board[i] = new Array(height);
@@ -109,6 +115,9 @@ Oiramrd.prototype.viriiFill = function(density) {
     
     midy = Math.floor(this.height / 2);
     
+    this.viriiCount = vCount;
+    this.display.setViriiCount ( this.viriiCount );
+    
     while(vCount > 0 ) {
         //pos = empty[empty.length -1 ]; 
         pos = empty[Math.floor(Math.random() * empty.length)];
@@ -130,6 +139,8 @@ Oiramrd.prototype.viriiFill = function(density) {
             vCount --;
         }
     }
+    
+    
     
     this.dumpBoard();
 }
@@ -185,15 +196,11 @@ Oiramrd.prototype.rotatePill = function (myPill, clockwise) {
     trace ( "\tslope=" + slope );
     if ( slope == undefined ) { // vertical myPill
         trace ( "\tvertical pill" );
-        if ( p1.y > p2.y ) { b1 = myPill.block1; b2 = myPill.block2; } 
-        else if ( p2.y > p1.y ) { b2 = myPill.block1; b1 = myPill.block2; }
+        if ( p1.y > p2.y ) { b1 = myPill.block1; b2 = myPill.block2; } // block 1 is bottom most
+        else if ( p2.y > p1.y ) { b2 = myPill.block1; b1 = myPill.block2; } // block 2 is bottomost
         else { trace ("SERIOUS ERROR !!!!"); }
         
-        trace ( "\tb1=" + b1 + " b2=" + b2);
-        
-        trace ( "\tb1_orig = " + b1 );
-        
-        b1.position.y = b2.position.y;
+        b2.position.y = b1.position.y;
         b1.position.x = clockwise ? b1.position.x + 1 : b1.position.x - 1;
         
         trace ( "\tb1_new = " + b1 );
@@ -210,8 +217,9 @@ Oiramrd.prototype.rotatePill = function (myPill, clockwise) {
         
         trace ( "\tb1_orig = " + b1 );
         
-        b1.position.x = b2.position.x;
-        b1.position.y = clockwise ? b1.position.y + 1 : b1.position.y - 1;
+        //b2.position.x = b1.position.x;
+        b1.position.x = b2.position.x ;
+        b1.position.y = clockwise ? b1.position.y - 1 : b1.position.y + 1;
         
         trace ( "\tb1_new = " + b1 );
     }
@@ -267,6 +275,20 @@ Oiramrd.prototype.canFall = function(blk) {
     }
 }
 
+Oiramrd.prototype.setScore = function( score ) {
+    this.score = score;
+    this.display.setScore ( this.score );
+}
+
+Oiramrd.prototype.addToScore = function ( blocksCleared, chainLevel ) {
+    trace("ADDING TO SCORE");
+    this.setScore ( this.getScore() + blocksCleared * 10 * chainLevel );
+}
+
+Oiramrd.prototype.getScore = function( ) {
+    return this.score;
+}
+
 /**
  * Causes all blocks that can fall due to gravity to fall by one board position.
  */
@@ -306,7 +328,7 @@ Oiramrd.prototype.applyGravity = function() {
                         
                         // block has fallen, it becomes a contact point if there are any blocks in the cardinal positions
                         // if ( blk has neighbors and is not falling) 
-                        this.blockMatcher.addContactPoint ( blk.position );
+                        this.blockMatcher.addContactBlock ( blk );
                         
                         numberOfBlocksFallen ++;
                         
@@ -315,7 +337,7 @@ Oiramrd.prototype.applyGravity = function() {
                             blk.linkedBlock.grav = true;
                             
                             // if ( blk has neighbors and is at rest)
-                            this.blockMatcher.addContactPoint ( blk.linkedBlock.position );
+                            this.blockMatcher.addContactBlock ( blk.linkedBlock );
                             this.display.updateBlock(blk.linkedBlock);
                             trace(this + ": Moving block " + blk.linkedBlock);
                             
@@ -332,8 +354,8 @@ Oiramrd.prototype.applyGravity = function() {
     // this can be changed to clear after some blocks have fallen
     if ( numberOfBlocksFallen == 0 ) {
         trace("block matcher: " + this.blockMatcher);
-        trace("contact points=" + this.blockMatcher.getContactPoints().length);
-        if ( this.blockMatcher.getContactPoints().length > 0 ) {
+        trace("contact points=" + this.blockMatcher.getContactBlocks().length);
+        if ( this.blockMatcher.getContactBlocks().length > 0 ) {
             this.blockMatcher.buildSearchGrid();
             this.blockMatcher.setMatched();
             var matchedPoints = this.blockMatcher.getMatchedPoints();            
@@ -345,6 +367,10 @@ Oiramrd.prototype.applyGravity = function() {
                     var p = matchedPoints[i].block.position;
                     this.destroyBlock (p.x, p.y);
                 }
+                this.display.sound.start();
+                
+                this.chainLevel ++;
+                
             } else {
                 trace("no matches");
             }
@@ -353,6 +379,13 @@ Oiramrd.prototype.applyGravity = function() {
             this.blockMatcher.dumpBoard();
             
             this.blockMatcher = new BlockMatcher ( this ); // reset
+            this.ticksPerStep = 1; // increase speed momentarily to clear all chains
+        }
+        else {
+            this.ticksPerStep = DEFAULT_TICKSPERSTEP ;
+            this.insertNextPill();
+            
+            this.chainLevel = 1;
         }
     }
     else {
@@ -417,6 +450,9 @@ Oiramrd.prototype.insertNextPill = function(pos1) {
     trace(this + ": myPill = " + myPill);
     
     this.addPillToBoard(myPill);    
+    
+    this.blockMatcher.addContactBlock ( myPill.block1 );
+    this.blockMatcher.addContactBlock ( myPill.block2 );
 }
 
 Oiramrd.prototype.setBoardPos = function(pos, val) {
@@ -462,9 +498,13 @@ Oiramrd.prototype.getBlock = function ( x, y ) {
 
 
 Oiramrd.prototype.destroyBlock = function ( x, y ) {
-    
+    if ( this.board[x][y] == BRD_VIRUS ) {
+        this.viriiCount --;
+        this.display.setViriiCount ( this.viriiCount );
+    }
     this.board[x][y] = BRD_EMPTY;
     var block = this.getBlock(x, y);
+    block.breakLinks();
     if ( ! block ) return;
     trace("attempting to destroy block " + block + " with mc " + block.mc);
     this.mcs[x][y] = null;
