@@ -6,19 +6,16 @@ package ly.jamie.oiramrd {
     private var contactPointHash: Object;
     private var contactPoints:Array;
     private var debug: Boolean;
+    public var trace: Function = function(msg:String):void{};
 
     function BlockMatcher(game: Oiramrd) {
         trace("creating blockmatcher");
         this.game = game;
-        this.searchGrid = null;
+        this.searchGrid = new Array();
+        this.searchGrid.push(new Array());
         this.contactPointHash = {};
         this.contactPoints = new Array();
         this.debug = true;
-
-    }
-
-    public function trace( msg: String ): void {
-        if ( this.debug ) trace( msg ) ;
     }
 
     public function setMatched(): void {
@@ -44,6 +41,7 @@ package ly.jamie.oiramrd {
                 neighbor = target;
 
                 while ( neighbor ) {
+                  this.trace("get enighboring block=" + neighbor);
                     neighbor = this.getNeighboringBlock ( neighbor, d );
 
 
@@ -142,6 +140,8 @@ package ly.jamie.oiramrd {
     * Returns a block from searchGrid
     */
     public function getNeighboringBlock( targetBlock: SearchedBlock, dir: Number ): SearchedBlock {
+      this.trace("GetNeighboring block");
+
         var pt: Point = targetBlock.block.position,
             x:Number = pt.x,
             y: Number = pt.y;
@@ -164,10 +164,23 @@ package ly.jamie.oiramrd {
                 return null;
         }
 
-        // check bounds
-        if ( x >= 0 && x < this.game.width && y >= 0 && y < this.game.height )
-            return this.searchGrid[x][y];
+      this.trace("GetNeighboring block bounds");
 
+      try {
+        // check bounds
+        if ( this.searchGrid 
+            && x >= 0 && x < this.searchGrid.length && this.searchGrid.length > 0
+            && this.searchGrid[x] && y >= 0 && y < this.searchGrid[x].length && this.searchGrid[x].length > 0 ) {
+            this.trace("GetNeighboring block bounds searchgrid = ");
+            var blk:* = this.searchGrid[x][y];
+            this.trace("GetNeighboring block bounds searchgrid blk=" + blk);
+            return blk;
+        }
+      }
+      catch(ex: *) {
+        this.trace("Exception in getNeighboringBlock search grid: "+ ex.message);
+        return null
+      }
         return null;
     }
 

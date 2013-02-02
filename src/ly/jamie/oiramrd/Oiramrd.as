@@ -295,12 +295,18 @@ package ly.jamie.oiramrd {
         return this.score;
     }
 
+    private function newBlockMatcher(): BlockMatcher {
+      var bm:BlockMatcher = new BlockMatcher(this);
+      bm.trace = debug;
+      return bm;
+    }
+
     /**
      * Causes all blocks that can fall due to gravity to fall by one board position.
      */
     public function applyGravity(): void {
         if ( this.blockMatcher == null ) {
-            this.blockMatcher = new BlockMatcher ( this );
+            this.blockMatcher = this.newBlockMatcher();
         }
 
         for(var x:Number=0; x< this.width; x++) { // iterate over columns 
@@ -317,9 +323,10 @@ package ly.jamie.oiramrd {
                 if( this.board[x][y] == Constants.BRD_EMPTY || this.board[x][y] == Constants.BRD_VIRUS) continue;
                 else if ( this.board[x][y] == Constants.BRD_BLOCK && this.canFall( this.mcs[x][y] )) { // block && all blocks above must fall
                     if ( this.mcs[x][y] == null ) {
-                        trace("ERROR!!!!");
+                        debug("ERROR!!!!");
                     }
                     else {
+                      debug("B");
                         var blk: Block = this.mcs[x][y];
                         var bb: BlockBullier = new BlockBullier();
                         if ( ! blk.grav ) {
@@ -351,29 +358,37 @@ package ly.jamie.oiramrd {
         // guarantees clearing only after all blocks fallen
         // this can be changed to clear after some blocks have fallen
         if ( numberOfBlocksFallen == 0 ) {
+          debug("C");
             if ( this.blockMatcher.getContactBlocks().length > 0 ) {
+              debug("D");
                 this.blockMatcher.buildSearchGrid();
+                debug("D0: set matched");
                 this.blockMatcher.setMatched();
+                debug("D1");
                 var matchedPoints: Array = this.blockMatcher.getMatchedPoints();
+                debug("D2");
                 if ( matchedPoints.length > 0 ) {
                     // clear matched
                     for ( var i: Number= 0 ; i < matchedPoints.length; i ++ ) {
                         var p: Point = matchedPoints[i].block.position;
                         this.destroyBlock (p.x, p.y);
                     }
-                    this.display.sound.play();
+                    // @todo play a sound
+                    //this.display.sound.play();
 
                     this.chainLevel ++;
 
                 } else {
                 }
+                debug("E");
 
                 this.blockMatcher.dumpBoard();
 
-                this.blockMatcher = new BlockMatcher ( this ); // reset
+                this.blockMatcher = this.newBlockMatcher();
                 this.ticksPerStep = 1; // increase speed momentarily to clear all chains
             }
             else {
+              debug("E");
                 this.ticksPerStep = Constants.DEFAULT_TICKSPERSTEP;
                 this.insertNextPill();
                 debug("INSERT PILL");
@@ -492,6 +507,7 @@ package ly.jamie.oiramrd {
     }
 
     public function destroyBlock( x:Number, y:Number ): void {
+      debug("Destroy");
         if ( this.board[x][y] == Constants.BRD_VIRUS ) {
             this.viriiCount --;
             this.display.setViriiCount ( this.viriiCount );
