@@ -18,7 +18,7 @@ package ly.jamie.oiramrd {
     public var factoryPill: PillFactory;
     public var display: Display;
     private var pf: PillFactory;
-    private var activePill: Pill;
+    public var activePill: Pill;
     public var debug: Function;
 
     /**

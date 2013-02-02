@@ -15,7 +15,7 @@ package ly.jamie.oiramrd{
         bb.down(game, b1);
         trace(this + ": Down! myPill = " + myPill);
     }
-    public function right(game, myPill): void {
+    public function right(game: Oiramrd, myPill: Pill): void {
         var bb:BlockBullier = new BlockBullier();
 
         // right most
@@ -29,7 +29,7 @@ package ly.jamie.oiramrd{
 
         trace(this + ": Down! myPill = " + myPill);
     }
-    public function left(game, myPill): void {
+    public function left(game: Oiramrd, myPill: Pill): void {
         var bb:BlockBullier = new BlockBullier();
 
         // right most
@@ -43,17 +43,15 @@ package ly.jamie.oiramrd{
         trace(this + ": Down! myPill = " + myPill);
     }
 
-    public function clockwise(game, myPill): void {
+    public function clockwise(game: Oiramrd, myPill: Pill): void {
         this.rotate(game, myPill, true);
     }
 
-    public function counterClockwise(game, myPill): void {
+    public function counterClockwise(game: Oiramrd, myPill: Pill): void {
         this.rotate(game, myPill, false);
     }
 
-    public function rotate(game, myPill, clockwise): void {
-        if ( clockwise == undefined ) clockwise = true;
-
+    public function rotate(game: Oiramrd, myPill: Pill, clockwise: Boolean = true): void {
         trace ( this + ":rotate myPill=" + myPill + " clcokwise=" + clockwise);
 
         var bb:BlockBullier = new BlockBullier();

@@ -48,10 +48,13 @@ package ly.jamie.oiramrd {
         this.addChild(gameMC);
 
         this.oiramrd = new Oiramrd(10, 20);
-        this.oiramrd.debug = function(msg: String): void {
+        var boundDebug: Function = function(msg: String): void {
           self.debug.call(self, msg);
         };
-        var INTERFACE:Interface = new Interface(this.oiramrd); 
+        this.oiramrd.debug = boundDebug;
+
+        var INTERFACE:Interface = new Interface(this.oiramrd, gameMC); 
+        INTERFACE.trace = boundDebug;
 
         var DISPLAY:Display = new Display(this.oiramrd, gameMC);
         gameMC.x = 85;

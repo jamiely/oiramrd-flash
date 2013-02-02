@@ -1,26 +1,35 @@
 package ly.jamie.oiramrd{
+  import flash.display.*;
+  import flash.events.*;
+  import flash.ui.*;
+
   public class Interface {
 
-    public var game:Oiramrd;
+    public var game: Oiramrd;
+    private var ap: Pill;
+    private var pp: PillPusher;
+    public var trace: Function;
  
-    public function Interface(game: Oiramrd) {
+    public function Interface(game: Oiramrd, root: MovieClip) {
         this.game = game;
-        //Key.addListener(this);
+        var self: Interface = this;
+        root.stage.addEventListener(KeyboardEvent.KEY_DOWN, function(e:Event): void {
+          self.onKeyboardDown.call(self, e);
+        });
     }
 
     public function toString(): String {
         return "<Interface>" + this.game + "</Interface>";
     }
 
-    /*
-    public function onKeyDown(): void {
-        trace("Keydown! Ascii=" + Key.getAscii() + " Code=" + Key.getCode());
+    public function onKeyboardDown(e: KeyboardEvent): void {
+        debug("onKeyboardDown = " + e);
 
-        switch ( Key.getAscii() ) {
+        switch ( e.charCode ) {
             case "g".charCodeAt(0):
                 // this.game.step();
                 // trace(this + ": stepped!");
-                // break;
+                 break;
             case "n".charCodeAt(0):
                 // trace("Game = " + this.game);
                 // this.game.insertNextPill();
@@ -30,7 +39,7 @@ package ly.jamie.oiramrd{
             // case "f".charCodeAt(0):
                 // trace("Virii fill");
                 // this.game.viriiFill(.1);
-                // break;
+                 break;
             case "d".charCodeAt(0):
                 // trace("dump board");
                 // this.game.dumpBoard();
@@ -45,52 +54,51 @@ package ly.jamie.oiramrd{
                     this.game.display.updatePill ( ap );
                 }
                 break;
-
         }
 
         ap = this.game.activePill;
 
-        if ( ap == undefined ) return;
+        if ( ap == null ) return;
 
         pp = new PillPusher();
 
-        switch ( Key.getCode() ) {
-            case Key.RIGHT:
-                if ( this.game.canMove ( ap, DIR_RIGHT ) ) {
+        switch ( e.keyCode ) {
+            case Keyboard.RIGHT:
+                if ( this.game.canMove ( ap, Constants.DIR_RIGHT ) ) {
                     pp.right(this.game, ap);
                     this.game.display.updatePill(ap);
-                    trace(this + ": KeyDown RIGHT");
+                    trace(this + ": Keyboard.own RIGHT");
                 }
                 break;
 
-            case Key.LEFT:
-                if ( this.game.canMove ( ap, DIR_LEFT ) ) {
+            case Keyboard.LEFT:
+                if ( this.game.canMove ( ap, Constants.DIR_LEFT ) ) {
                     pp.left(this.game, ap);
                     this.game.display.updatePill(ap);
-                    trace(this + ": KeyDown LEFT");
+                    trace(this + ": Keyboard.own LEFT");
                 }
                 break;
             // does not work properly
-            // case Key.DOWN:
+            // case Keyboard.DOWN:
                 // if ( this.game.canMove ( ap, DIR_DOWN ) ) {
                     // pp.down(this.game, ap);
                     // this.game.display.updatePill(ap);
-                    // trace(this + ": KeyDown LEFT");
+                    // trace(this + ": Keyboard.own LEFT");
                 // }
                 // break;
-            case Key.Down:
+            case Keyboard.DOWN:
                 this.game.step(); // alternate down
                 break;
-            case Key.UP:
+            case Keyboard.UP:
                 trace ( "\tkey=up ap=" + ap );
                 if ( this.game.canRotate(ap, true) ) {
                     pp.clockwise(this.game, ap);
                     this.game.display.updatePill(ap);
-                    trace ( this + ": KeyDown UP" );
+                    trace ( this + ": Keyboard.own UP" );
                 }
 
                 break;
-            case Key.CTRL:
+            case Keyboard.CONTROL:
                 if ( this.game.canRotate(ap, true) ){
                     pp.counterClockwise(this.game, ap);
                     this.game.display.updatePill ( ap );
@@ -98,9 +106,6 @@ package ly.jamie.oiramrd{
                 break;
         }
     }
-    */
-    public function onKeyUp(): void {
-
-    }
   }
 }
+
