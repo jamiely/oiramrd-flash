@@ -1,21 +1,21 @@
 package ly.jamie.oiramrd{
-  class Interface {
-  
-    var game:Oiramrd;
+  public class Interface {
+
+    public var game:Oiramrd;
  
-    function Interface(game) {
+    public function Interface(game: Oiramrd) {
         this.game = game;
-        Key.addListener(this);
-        
+        //Key.addListener(this);
     }
-    
-    public function toString(): void {
+
+    public function toString(): String {
         return "<Interface>" + this.game + "</Interface>";
     }
-    
+
+    /*
     public function onKeyDown(): void {
         trace("Keydown! Ascii=" + Key.getAscii() + " Code=" + Key.getCode());
-        
+
         switch ( Key.getAscii() ) {
             case "g".charCodeAt(0):
                 // this.game.step();
@@ -37,7 +37,7 @@ package ly.jamie.oiramrd{
                 // var bm = new BlockMatcher(this.game);
                 // bm.buildSearchGrid();
                 // bm.dumpBoard();
-                
+
                 break;
             case "z".charCodeAt(0):
                 if ( this.game.canRotate(ap, true) ){
@@ -45,15 +45,15 @@ package ly.jamie.oiramrd{
                     this.game.display.updatePill ( ap );
                 }
                 break;
-                
+
         }
-        
+
         ap = this.game.activePill;
-        
+
         if ( ap == undefined ) return;
-        
+
         pp = new PillPusher();
-        
+
         switch ( Key.getCode() ) {
             case Key.RIGHT:
                 if ( this.game.canMove ( ap, DIR_RIGHT ) ) {
@@ -62,7 +62,7 @@ package ly.jamie.oiramrd{
                     trace(this + ": KeyDown RIGHT");
                 }
                 break;
-               
+
             case Key.LEFT:
                 if ( this.game.canMove ( ap, DIR_LEFT ) ) {
                     pp.left(this.game, ap);
@@ -88,7 +88,7 @@ package ly.jamie.oiramrd{
                     this.game.display.updatePill(ap);
                     trace ( this + ": KeyDown UP" );
                 }
-                
+
                 break;
             case Key.CTRL:
                 if ( this.game.canRotate(ap, true) ){
@@ -98,9 +98,9 @@ package ly.jamie.oiramrd{
                 break;
         }
     }
-    
+    */
     public function onKeyUp(): void {
-        
+
     }
   }
 }

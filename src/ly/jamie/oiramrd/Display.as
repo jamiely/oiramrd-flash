@@ -113,7 +113,6 @@ package ly.jamie.oiramrd {
         this.left = 70;
 
         this.textfields.viriiLeft = this.newTextField(this.left, -150, 50, 50);
-        this.textfields.viriiLeft.autoSize = true;
 
         this.myformat = new TextFormat();
         this.myformat.color = 0x000000;
@@ -141,7 +140,6 @@ package ly.jamie.oiramrd {
         this.textfields.score = this.newTextField(this.left, -100, 50, 50);
         this.setScore ( "?" );
         with ( this.textfields.score ) {
-            autoSize = true;
             setTextFormat(this.myformat);
         }
 
@@ -153,7 +151,6 @@ package ly.jamie.oiramrd {
 
         this.textfields.level = this.newTextField(this.left, -60, 50, 50);
         with ( this.textfields.level ) {
-            autoSize = true;
             setTextFormat(this.myformat);
         }
     }
@@ -266,27 +263,28 @@ package ly.jamie.oiramrd {
     }
 
     public function initVirus(): void {
-        if ( this.virus == null ) { 
-            this.virus = new MovieClip();
-            this.virii.addChild(this.virus);
-            this.virus.x = 15;
+        if ( this.virus )  return; 
 
-            var w:Number = this.blockSize.x / 2;
-            var h:Number = this.blockSize.y / 2;
+        this.virus = new MovieClip();
+        this.virii.addChild(this.virus);
 
-            with ( this.virus ) {
-                lineStyle(1, 0xFF0000, 100);
-                beginFill(0xFFFFFF);
-                moveTo(0, h);
-                curveTo(w, h, w, 0);
-                curveTo(w, -h, 0, -h);
-                curveTo(-w, -h, -w, 0);
-                curveTo(-w, h, 0, h);
-                endFill();
-            }
+        this.virus.x = 15;
 
-            this.virus.visible = false;
+        var w:Number = this.blockSize.x / 2;
+        var h:Number = this.blockSize.y / 2;
+
+        with ( this.virus.graphics ) {
+            lineStyle(1, 0xFF0000, 100);
+            beginFill(0xFFFFFF);
+            moveTo(0, h);
+            curveTo(w, h, w, 0);
+            curveTo(w, -h, 0, -h);
+            curveTo(-w, -h, -w, 0);
+            curveTo(-w, h, 0, h);
+            endFill();
         }
+
+        this.virus.visible = false;
     }
   }
 }

@@ -3,7 +3,7 @@ package ly.jamie.oiramrd {
 
   public class BlockFactory {
 
-    private var mc: MovieClip;
+    public var mc: MovieClip;
 
     /**
      * Class to build blocks.

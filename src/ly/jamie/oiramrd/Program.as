@@ -1,36 +1,75 @@
 package ly.jamie.oiramrd {
   import flash.display.*;
+  import flash.events.*;
+  import flash.text.*;
 
-  class Program extends MovieClip {
-    public function gameStart(): void {
+  public class Program extends MovieClip {
+    private var game: MovieClip;
+    private var boundOnEnterFrame: Function;
+    private var clock: Number;
+    private var oiramrd: Oiramrd;
+    private var txtDebug: TextField;
+
+    public function Program() {
+      this.drawBackground();
+      debug("Background drawn");
+      try {
+        this.startGame();
+        debug("Game started");
+      }
+      catch(ex: *) {
+        debug("Problem starting game: " + ex.message);
+      }
+    }
+
+    private function debug(msg: String): void {
+      if(!this.txtDebug) {
+        this.txtDebug = new TextField();
+        this.txtDebug.width = 200;
+        this.txtDebug.x = 200;
+        this.txtDebug.opaqueBackground = 0xeeeeee;
+        this.addChild(this.txtDebug);
+      }
+      this.txtDebug.text = msg + "\n" + this.txtDebug.text;
+    }
+
+    private function drawBackground(): void {
+      var g:Graphics = this.graphics;
+      g.beginFill(0xff0000);
+      g.drawRect(0, 0, 500, 500);
+      g.endFill();
+    }
+
+    public function startGame(): void {
         var gameMC:MovieClip = new MovieClip();
+        this.game = gameMC;
         this.addChild(gameMC);
 
-        var OIRAMRD:Oiramrd = new Oiramrd(10, 20);
-        var INTERFACE:Interface = new Interface(OIRAMRD); 
+        this.oiramrd = new Oiramrd(10, 20);
+        var INTERFACE:Interface = new Interface(this.oiramrd); 
 
-        var DISPLAY:Display = new Display(OIRAMRD, gameMC);
-        trace(this + ": Created display object.");
+        var DISPLAY:Display = new Display(this.oiramrd, gameMC);
         gameMC.x = 85;
         gameMC.y = 175;
 
         DISPLAY.initialize();
-        trace(this + ": Initialized display object.");
-
-        trace(this + ": BF = " + BF);
         Oiramrd.BF.mc = DISPLAY.blocks;
 
-        OIRAMRD.viriiFill(.01);
-
-        OIRAMRD.setScore( 0 );
-        clock = 0;
+        this.oiramrd.viriiFill(.01);
+        this.oiramrd.setScore( 0 );
+        this.clock = 0;
 
         DISPLAY.setLevel(1);
 
+        var self: Program = this;
+        this.boundOnEnterFrame = function(): void {
+          self.onEnterFrame.call(self);
+        };
+        this.addEventListener(Event.ENTER_FRAME, this.boundOnEnterFrame);
     }
 
-    public function GetCongratulationsText( s:Number ): void {
-        var t = "";
+    public function GetCongratulationsText( s:Number ): String {
+        var t: String = "";
         if ( s < 1000 ) {
             t = "Try again.";
         } 
@@ -46,34 +85,30 @@ package ly.jamie.oiramrd {
         return t;
     }
 
-
-
     public function onEnterFrame(): void {
         this.clock ++;
 
-        if ( OIRAMRD.isGameOver() ) {
+        debug("Clock: " + this.clock);
 
-            _root.createTextField ( "tf",
-                9999,
-                0, 
-                0,
-                200,
-                200 );
+        if ( this.oiramrd.isGameOver() ) {
+            var tf: TextField = new TextField();
+            tf.width = 200;
+            tf.height = 200;
 
-            var tform = new TextFormat();
+            var tform: TextFormat = new TextFormat();
             tform.bold = true;
-            tform.url = "http://www.angelforge.com";
+            tform.url = "http://jamie.ly";
+            tf.setTextFormat ( tform );
 
-            _root.tf.setTextFormat ( tform );
+            tf.multiline = true;
+            tf.text = "Game Over.\n" + this.GetCongratulationsText(this.oiramrd.score) 
+              + "\nYour Score: " + this.oiramrd.score + "\n\nangelforge.com";
 
-            _root.tf.multiline = true;
-            _root.tf.text = "Game Over.\n" + this.GetCongratulationsText(OIRAMRD.score) + "\nYour Score: " + OIRAMRD.score + "\n\nangelforge.com";
-
-            _root.game.removeMovieClip();
-
-            this.onEnterFrame = undefined;
+            this.game.parent.removeChild(this.game);
+            this.game = null;
+        } else if ( this.clock % this.oiramrd.ticksPerStep == 0 )  {
+          this.oiramrd.applyGravity();
         }
-        if ( this.clock % OIRAMRD.ticksPerStep == 0 )  OIRAMRD.applyGravity();
     }
   }
 
