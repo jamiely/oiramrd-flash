@@ -23,7 +23,7 @@ package ly.jamie.oiramrd{
     }
 
     public function onKeyboardDown(e: KeyboardEvent): void {
-        debug("onKeyboardDown = " + e);
+        this.trace("onKeyboardDown = " + e);
 
         switch ( e.charCode ) {
             case "g".charCodeAt(0):
@@ -67,7 +67,7 @@ package ly.jamie.oiramrd{
                 if ( this.game.canMove ( ap, Constants.DIR_RIGHT ) ) {
                     pp.right(this.game, ap);
                     this.game.display.updatePill(ap);
-                    trace(this + ": Keyboard.own RIGHT");
+                    this.trace(this + ": KeyboardDown RIGHT");
                 }
                 break;
 
@@ -75,7 +75,7 @@ package ly.jamie.oiramrd{
                 if ( this.game.canMove ( ap, Constants.DIR_LEFT ) ) {
                     pp.left(this.game, ap);
                     this.game.display.updatePill(ap);
-                    trace(this + ": Keyboard.own LEFT");
+                    this.trace(this + ": KeyboardDown LEFT");
                 }
                 break;
             // does not work properly
@@ -83,18 +83,18 @@ package ly.jamie.oiramrd{
                 // if ( this.game.canMove ( ap, DIR_DOWN ) ) {
                     // pp.down(this.game, ap);
                     // this.game.display.updatePill(ap);
-                    // trace(this + ": Keyboard.own LEFT");
+                    // this.trace(this + ": KeyboardDown LEFT");
                 // }
                 // break;
             case Keyboard.DOWN:
                 this.game.step(); // alternate down
                 break;
             case Keyboard.UP:
-                trace ( "\tkey=up ap=" + ap );
+                this.trace ( "\tkey=up ap=" + ap );
                 if ( this.game.canRotate(ap, true) ) {
                     pp.clockwise(this.game, ap);
                     this.game.display.updatePill(ap);
-                    trace ( this + ": Keyboard.own UP" );
+                    this.trace ( this + ": KeyboardDown UP" );
                 }
 
                 break;
