@@ -1,15 +1,22 @@
 package ly.jamie.oiramrd {
-  class Block {
-    /**
-     * Class to contain block information.
-     */
-    function Block(position, colorIndex, mc) {
+  import flash.display.MovieClip;
+  /**
+   * Class to contain block information.
+   */
+  public class Block {
+    public var colorIndex:Number;
+    public var mc:MovieClip;
+    public var position: Point;
+    public var canFall: Boolean;
+    public var linkedBlock: Block;
+    public var grav: Boolean;
+
+    function Block(position:Point, colorIndex:Number, mc:MovieClip) {
         this.colorIndex = colorIndex;
         this.mc = mc;
-
-
         this.position = position;
         this.canFall = true;
+        this.grav = false;
 
         this.linkedBlock = null;
     }
@@ -24,21 +31,20 @@ package ly.jamie.oiramrd {
             this.linkedBlock.linkedBlock = null; 
             this.linkedBlock = null;
         }
-
     }
 
-    public function toString(): void {
-        tmp = new Array("Block", this.position, this.mc, this.colorIndex);
+    public function toString(): String {
+        var tmp:Array = new Array("Block", this.position, this.mc, this.colorIndex);
         return "<" + tmp.join(" ") + ">";
     }
 
-    public function copy(): void {
+    public function copy(): Block {
         return new Block(this.position.copy(), this.colorIndex, this.mc);
     }
-    public function getX(): void {
+    public function getX(): Number {
         return this.position.x;
     }
-    public function getY(): void {
+    public function getY(): Number {
         return this.position.y;
     }
 

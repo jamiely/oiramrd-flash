@@ -1,6 +1,13 @@
 package ly.jamie.oiramrd {
-  class BlockMatcher {
-    function BlockMatcher(game) {
+  public class BlockMatcher {
+
+    private var game:Oiramrd;
+    private var searchGrid:*;
+    private var contactPointHash: Object;
+    private var contactPoints:Array;
+    private var debug: Boolean;
+
+    function BlockMatcher(game: Oiramrd) {
         trace("creating blockmatcher");
         this.game = game;
         this.searchGrid = null;
@@ -10,19 +17,17 @@ package ly.jamie.oiramrd {
 
     }
 
-
-
-    public function trace( msg ): void {
+    public function trace( msg: String ): void {
         if ( this.debug ) trace( msg ) ;
-
     }
 
     public function setMatched(): void {
         this.trace ( "BlockMatched.setMatched: Begin" );
 
-        var directions = new Array(DIR_UP, DIR_LEFT);
-        var cp, d, neighbor, target;
-        for ( var i = 0; i < this.contactPoints.length; i ++ ) {
+        var directions:Array = new Array(Constants.DIR_UP, Constants.DIR_LEFT);
+        var cp:Point, d:Number, neighbor:SearchedBlock, target:SearchedBlock;
+
+        for ( var i:Number = 0; i < this.contactPoints.length; i ++ ) {
             cp = this.contactPoints [ i ].position;
             this.trace ("\tBlockMatched.setMatched: contactPoint = " + cp ) ;
 
@@ -30,11 +35,11 @@ package ly.jamie.oiramrd {
             this.trace ("\tBlockMatched.setMatched: target = " + target );
 
 
-            for ( var j = 0; j < directions.length; j ++ ) {
+            for ( var j:Number = 0; j < directions.length; j ++ ) {
                 d = directions[j];
                 this.trace ("\BlockMatched.setMatched: Direction = " + d );
 
-                matches = new Array();
+                var matches: Array = new Array();
 
                 neighbor = target;
 
@@ -53,7 +58,7 @@ package ly.jamie.oiramrd {
                     else if ( neighbor.block.colorIndex != target.block.colorIndex ) continue;
                     // must not have been matched.
                     // theoretically, would never reach here, b/c if matched, then searched.
-                    else if ( neighbor.block.matched ) continue;
+                    else if ( neighbor.matched ) continue;
 
                     // already searched in this direction
                     neighbor.searched [ d ] = true;
@@ -61,7 +66,7 @@ package ly.jamie.oiramrd {
                 }
 
 
-                d = getOppositeDirection( d );
+                d = Constants.getOppositeDirection( d );
                 this.trace ("\BlockMatched.setMatched: Direction = " + d );
 
 
@@ -82,7 +87,7 @@ package ly.jamie.oiramrd {
                     else if ( neighbor.block.colorIndex != target.block.colorIndex ) break;
                     // must not have been matched.
                     // theoretically, would never reach here, b/c if matched, then searched.
-                    else if ( neighbor.block.matched ) continue;
+                    else if ( neighbor.matched ) continue;
 
                     // already searched in this direction
                     neighbor.searched [ d ] = true;
@@ -102,7 +107,7 @@ package ly.jamie.oiramrd {
 
                 if ( matches.length >= this.game.minimumBlocksToClear ) {
                     this.trace ("\BlockMatched.setMatched: setting blocks as matched:\n" + matches.join("\n"));
-                    for ( var k = 0 ; k < matches.length; k ++ ) {
+                    for ( var k: Number = 0 ; k < matches.length; k ++ ) {
                         matches[k].matched = true;
 
 
@@ -119,12 +124,12 @@ package ly.jamie.oiramrd {
         }
     }
 
-    public function getMatchedPoints(): void {
+    public function getMatchedPoints(): Array {
         this.trace ( "BlockMatcher.getMatchedPoints: Begin" );
-        var matched = new Array();
+        var matched:Array = new Array();
 
-        for(var i=0; i < this.game.width; i ++ ) {
-            for ( var j=0; j < this.game.height; j++ ) {
+        for(var i:Number=0; i < this.game.width; i ++ ) {
+            for ( var j:Number=0; j < this.game.height; j++ ) {
                 if ( this.searchGrid[i][j].matched ) 
                     matched.push ( this.searchGrid[i][j] );
             }
@@ -134,25 +139,25 @@ package ly.jamie.oiramrd {
     }
 
     /**
-            * Returns a block from searchGrid
-            */
-    public function getNeighboringBlock( targetBlock, dir ): void {
-        var pt = targetBlock.block ? targetBlock.block.position : targetBlock.position,
-            x = pt.x,
-            y = pt.y;
+    * Returns a block from searchGrid
+    */
+    public function getNeighboringBlock( targetBlock: SearchedBlock, dir: Number ): SearchedBlock {
+        var pt: Point = targetBlock.block.position,
+            x:Number = pt.x,
+            y: Number = pt.y;
 
 
         switch ( dir ) {
-            case DIR_UP:
+            case Constants.DIR_UP:
                 y--;
                 break;
-            case DIR_DOWN:
+            case Constants.DIR_DOWN:
                 y++;
                 break;
-            case DIR_RIGHT:
+            case Constants.DIR_RIGHT:
                 x++;
                 break;
-            case DIR_LEFT:
+            case Constants.DIR_LEFT:
                 x--;
                 break;
             default:
@@ -166,7 +171,7 @@ package ly.jamie.oiramrd {
         return null;
     }
 
-    public function addContactBlock( blk ): void { 
+    public function addContactBlock( blk: Block ): void { 
         // hash guarantees unqiue points
 
         if ( ! this.contactPointHash [ blk.mc._target ] ) {
@@ -178,25 +183,25 @@ package ly.jamie.oiramrd {
 
     public function buildSearchGrid(): void {
         this.searchGrid = new Array(this.game.width);
-        for(var i=0; i < this.game.width; i++) {
+        for(var i:Number=0; i < this.game.width; i++) {
             this.searchGrid[i] = new Array(this.game.height);
         }
 
-        for(var i=0; i < this.game.width; i ++ ) {
-            for ( var j=0; j < this.game.height; j++ ) {
+        for(i=0; i < this.game.width; i ++ ) {
+            for ( var j:Number=0; j < this.game.height; j++ ) {
                 this.searchGrid[i][j] = new SearchedBlock ( this.game.getBlock ( i, j ) );
             }
         }
     }
 
-    public function dumpBoard(tab): void {
-        str = ""
-        if ( tab == undefined ) tab = ""
+    public function dumpBoard(tab: String = ""): void {
+        var str: String = ""
 
-        for ( var j = 0; j < this.game.height; j++) {
+        for ( var j: Number=0; j < this.game.height; j++) {
             str = str + tab;
-            for ( i=0; i < this.game.width; i++ ) {
-                chr = this.searchGrid[i][j].block ? this.searchGrid[i][j].block.colorIndex : ".";
+            for ( var i: Number=0; i < this.game.width; i++ ) {
+                var chr: String = this.searchGrid[i][j].block ? 
+                  this.searchGrid[i][j].block.colorIndex : ".";
                 str = str + chr;
             }
             str = str + "\n";
@@ -206,14 +211,8 @@ package ly.jamie.oiramrd {
     }
 
  
-    public function getContactBlocks(): void {
+    public function getContactBlocks(): Array {
         return this.contactPoints;
     }
-    /**/
-
-    public function toString(): String {
-        return "block matcher";
-    }
-
   }
 }

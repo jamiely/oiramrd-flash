@@ -1,31 +1,35 @@
-/**
- * Class to build pills.  Should make use of block factory.
- */
-function PillFactory() {
-    trace("Creating myPill factory");
-    this.blockFactory = BF;
-    this.getRandomPill = function(pos1, boolUpToDown) {
-        if ( boolUpToDown == undefined ) boolUpToDown = true;
-        ci1 = Math.floor(Math.random() * SETTINGS.pillColorCount());
-        ci2 = Math.floor(Math.random() * SETTINGS.pillColorCount());
-        
-        pos2 = boolUpToDown ? new Point(pos1.x, pos1.y + 1) :
+package ly.jamie.oiramrd{
+  /**
+   * Class to build pills.  Should make use of block factory.
+   */
+  public class PillFactory{
+    private var blockFactory: BlockFactory;
+
+    function PillFactory() {
+        trace("Creating myPill factory");
+        this.blockFactory = Oiramrd.BF;
+    }
+    public function getRandomPill(pos1:Point, boolUpToDown:Boolean = true): Pill {
+        var ci1: Number = Math.floor(Math.random() * Settings.Shared.pillColorCount());
+        var ci2: Number = Math.floor(Math.random() * Settings.Shared.pillColorCount());
+
+        var pos2: Point = boolUpToDown ? new Point(pos1.x, pos1.y + 1) :
             new Point(pos1.x + 1, pos1.y);
-        
-        trace(this + ": getting random myPill with ci1 = " + ci1 + " ci2 = " + ci2 + " pos1 = " + pos1 + " pos2 = " + pos2);
-        
+
         return this.getPill(pos1, ci1, pos2, ci2);
     }
-    this.getPill = function(pos1, colorIndex1, pos2, colorIndex2) {
-        bf = this.blockFactory;
-        
-        b1 = bf.getBlock ( pos1, colorIndex1 );
-        b2 = bf.getBlock ( pos2, colorIndex2 ); 
-        p = new Pill ( b1, b2 );
-        trace("PillFactory.getPill: bf = " + bf + " b1=" + b1 + " b2=" + b2 + "?" + p);
+    public function getPill(pos1: Point, colorIndex1: Number, 
+                            pos2: Point, colorIndex2: Number): Pill {
+        var bf:BlockFactory = this.blockFactory;
+
+        var b1: Block = bf.getBlock ( pos1, colorIndex1 );
+        var b2: Block = bf.getBlock ( pos2, colorIndex2 ); 
+        var p: Pill = new Pill ( b1, b2 );
+
         return p;
     }
-    this.toString = function() {
+    public function toString(): String {
         return "<PillFactory>" + this.blockFactory + "</PillFactory>";
     }
+  }
 }

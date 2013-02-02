@@ -10,6 +10,16 @@ package ly.jamie.oiramrd {
     public function toString(): String {
       return "(" + this.x + ", " + this.y + ")";
     }
+    public function copy(): Point {
+      return new Point(this.x, this.y);
+    }
+    public function equals(p: Point): Boolean {
+      return this.x == p.x && this.y == p.y;
+    }
+    public function slope(p: Point): * {
+      var dx: Number = this.x - p.x;
+      return dx == 0 ? undefined : (this.y - p.y)/dx;
+    }
   }
 }
 

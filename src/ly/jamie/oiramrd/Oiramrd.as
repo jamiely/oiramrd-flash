@@ -1,15 +1,35 @@
 package ly.jamie.oiramrd {
-  class Oiramrd {
+  public class Oiramrd {
+    public static var BF:BlockFactory = new BlockFactory();
+
+    public var board: Array;
+    public var mcs: Array;
+    public var blockMatcher: BlockMatcher;
+    public var minimumBlocksToClear: Number;
+    public var ticksPerStep: Number;
+    public var viriiCount: Number;
+    public var density: Number;
+    public var level: Number;
+    public var gameIsOver: Boolean;
+    public var score: Number;
+    public var chainLevel: Number;
+    public var width: Number;
+    public var height: Number;
+    public var factoryPill: PillFactory;
+    public var display: Display;
+    private var pf: PillFactory;
+    private var activePill: Pill;
+
     /**
      * This is the main class
      */
-    function Oiramrd(width, height) {
+    public function Oiramrd(width: Number, height: Number) {
         trace(this + ": Oiramrd");
         this.board = new Array(width);
         this.mcs = new Array(height);
         this.blockMatcher = undefined;
         this.minimumBlocksToClear = 4;
-        this.ticksPerStep = DEFAULT_TICKSPERSTEP ;
+        this.ticksPerStep = Constants.DEFAULT_TICKSPERSTEP ;
         this.viriiCount = 0;
         this.density = 0;
         this.level = 1;
@@ -23,7 +43,7 @@ package ly.jamie.oiramrd {
         this.score = 0;
         this.chainLevel = 1; // multiplier for score
 
-        for(var i=0; i < width; i++) {
+        for(var i: Number=0; i < width; i++) {
 
             this.board[i] = new Array(height);
             this.mcs[i] = new Array(height);
@@ -43,9 +63,9 @@ package ly.jamie.oiramrd {
      */
     public function initialize():void {
         trace(this + ": Initialize");
-        for(var i=0; i < this.width; i++) {
-            for(var j=0; j < this.height; j++) {
-                this.board[i][j] = BRD_EMPTY;
+        for(var i:Number=0; i < this.width; i++) {
+            for(var j:Number=0; j < this.height; j++) {
+                this.board[i][j] = Constants.BRD_EMPTY;
                 if(this.mcs[i][j] != null) {
                     this.mcs[i][j].removeMovieClip();
                     this.mcs[i][j] = null;
@@ -54,8 +74,6 @@ package ly.jamie.oiramrd {
         }
 
         this.factoryPill = new PillFactory();
-
-        trace("\tBoard:");
         this.dumpBoard("\t");
     }
 
@@ -63,17 +81,17 @@ package ly.jamie.oiramrd {
      * This function is used for debugging purposes, it dumps
      * the contents of the board to stdout
      */
-    public function dumpBoard(tab):void {
-        str = ""
-        if ( tab == undefined ) tab = ""
-        for ( var j = 0; j < this.height; j++) {
+    public function dumpBoard(tab:String = ""):void {
+        var str:String = ""
+
+        for ( var j:Number = 0; j < this.height; j++) {
             str = str + tab;
-            for ( i=0; i < this.width; i++ ) {
-                char = "?";
+            for ( var i:Number=0; i < this.width; i++ ) {
+                var char: String = "?";
                 switch ( this.board[i][j] ) {
-                    case BRD_EMPTY: char = "."; break;
-                    case BRD_VIRUS: char = "@";  break;
-                    case BRD_BLOCK: char = "#"; break;
+                    case Constants.BRD_EMPTY: char = "."; break;
+                    case Constants.BRD_VIRUS: char = "@";  break;
+                    case Constants.BRD_BLOCK: char = "#"; break;
                 }
                 str = str + char;
             }
@@ -93,36 +111,33 @@ package ly.jamie.oiramrd {
         this.applyGravity();
     }
 
-    public function viriiFill(density): void {
+    public function viriiFill(density: Number): void {
         this.density = density;
 
-        avail = this.width * this.height;
-        vCount = Math.floor(avail * density);
-        vf = new VirusFactory();
+        var avail:Number = this.width * this.height;
+        var vCount:Number = Math.floor(avail * density);
+        var vf:VirusFactory = new VirusFactory();
 
         trace(this + " avail = " + avail + " vCount = " + vCount);
-        empty = this.getRandomEmptyBoardPositions();
+        var empty:Array = this.getRandomEmptyBoardPositions();
 
-        midy = Math.floor(this.height / 4);
+        var midy:Number = Math.floor(this.height / 4);
 
         this.viriiCount = vCount;
         this.display.setViriiCount ( this.viriiCount );
 
         while(vCount > 0 ) {
-            //pos = empty[empty.length -1 ]; 
-            pos = empty[empty.length-1];
+            var pos: Point = empty[empty.length-1];
 
 
 
             if ( pos.y >= midy ) { // fill below midpoint of board
 
 
-                ci = Math.floor(Math.random() * SETTINGS.pillColorCount());
+                var ci: Number = Math.floor(Math.random() * Settings.Shared.pillColorCount());
                 trace ( ci );
                 if ( pos == null ) return;
-                virus = vf.getVirus(pos, ci);
-
-                trace(this + ": New virus " + virus);
+                var virus: Block = vf.getVirus(pos, ci);
 
                 this.setVirus(virus);
                 this.display.addVirusToBoard(virus);
@@ -141,27 +156,27 @@ package ly.jamie.oiramrd {
     }
 
     // http://sedition.com/perl/javascript-fy.html
-    function fisherYates ( myArray ) {
-      for ( var i = myArray.length - 1; i >= 0; i-- ) {
-         var j = Math.floor( Math.random() * ( i + 1 ) );
-         var tempi = myArray[i];
-         var tempj = myArray[j];
+    private function fisherYates ( myArray: Array ): void {
+      for ( var i:Number = myArray.length - 1; i >= 0; i-- ) {
+         var j:Number = Math.floor( Math.random() * ( i + 1 ) );
+         var tempi:* = myArray[i];
+         var tempj:* = myArray[j];
          myArray[i] = tempj;
          myArray[j] = tempi;
        }
     }
 
-    public function getRandomEmptyBoardPositions(): void {
-        var positions = this.getEmptyBoardPositions();
+    public function getRandomEmptyBoardPositions(): Array {
+        var positions: Array = this.getEmptyBoardPositions();
         fisherYates(positions);
         return positions;
     }
 
-    public function getEmptyBoardPositions(): void {
-        empty = new Array();
-        for(i=0; i < this.width; i++) {
-            for(j=0; j< this.height; j++ ) {
-                if ( this.board[i][j] == BRD_EMPTY ) {
+    public function getEmptyBoardPositions(): Array {
+        var empty: Array = new Array();
+        for(var i:Number=0; i < this.width; i++) {
+            for(var j:Number=0; j< this.height; j++ ) {
+                if ( this.board[i][j] == Constants.BRD_EMPTY ) {
                     empty.push( new Point(i, j) );
                 }
             }
@@ -170,52 +185,41 @@ package ly.jamie.oiramrd {
         return empty;
     }
 
-    public function canRotate(myPill, clockwise): void {
-        if ( clockwise == undefined ) clockwise = true;
-        //trace ( this + ":canRotate myPill=" + myPill + " clockwise=" + clockwise );
-
+    public function canRotate(myPill: Pill, clockwise: Boolean = true): Boolean {
         this.dumpBoard();
 
-        cpyPill = myPill.copy();
+        var cpyPill: Pill = myPill.copy();
         this.rotatePill(cpyPill, clockwise);
 
-        pos1 = myPill.block1.position;
-        pos2 = myPill.block2.position;
+        var pos1: Point = myPill.block1.position;
+        var pos2: Point = myPill.block2.position;
+        var n1: Point = cpyPill.block1.position;
+        var n2: Point = cpyPill.block2.position;
+        var b1: Boolean = (this.board[n1.x][n1.y] == Constants.BRD_EMPTY || n1.equals(pos1) || n1.equals(pos2));
+        var b2: Boolean = (this.board[n2.x][n2.y] == Constants.BRD_EMPTY || n2.equals(pos1) || n2.equals(pos2));
 
-        n1 = cpyPill.block1.position;
-        n2 = cpyPill.block2.position;
-
-        b1 = (this.board[n1.x][n1.y] == BRD_EMPTY || n1.equals(pos1) || n1.equals(pos2));
-        b2 = (this.board[n2.x][n2.y] == BRD_EMPTY || n2.equals(pos1) || n2.equals(pos2));
-
-        result = b1 && b2 ;
-
-        //trace ( "\tb1 = " + b1 + " b2=" + b2 );
+        var result: Boolean = b1 && b2 ;
 
         this.dumpBoard();
 
         return result;
     }
 
-    Oiramrd.prototype.rotatePill = function (myPill, clockwise) {
+    public function rotatePill(myPill: Pill, clockwise: Boolean): void {
         trace (this + ":rotatePill myPill=" + myPill + " clockwise=" + clockwise );
 
-        p1 = myPill.block1.position;
-        p2 = myPill.block2.position;
+        var p1: Point = myPill.block1.position;
+        var p2: Point = myPill.block2.position;
 
-        //trace( "\tp1=" + p1 + " p2=" + p2);
-        slope = p1.slope(p2); 
-        //trace ( "\tslope=" + slope );
+        var slope:* = p1.slope(p2); 
+        var b1: Block, b2: Block;
         if ( slope == undefined ) { // vertical myPill
-            //trace ( "\tvertical pill" );
             if ( p1.y > p2.y ) { b1 = myPill.block1; b2 = myPill.block2; } // block 1 is bottom most
             else if ( p2.y > p1.y ) { b2 = myPill.block1; b1 = myPill.block2; } // block 2 is bottomost
             else { trace ("SERIOUS ERROR !!!!"); }
 
             b2.position.y = b1.position.y;
             b1.position.x = clockwise ? b1.position.x + 1 : b1.position.x - 1;
-
-            //trace ( "\tb1_new = " + b1 );
         }
         else if ( slope == 0 ) { // horizontal myPill
             //trace ( "\thorizontal pill ")
@@ -232,22 +236,18 @@ package ly.jamie.oiramrd {
             //b2.position.x = b1.position.x;
             b1.position.x = b2.position.x ;
             b1.position.y = clockwise ? b1.position.y - 1 : b1.position.y + 1;
-
-            //trace ( "\tb1_new = " + b1 );
         }
         else { // a somehow disjointed myPill
             trace( "SERIOUS ERROR" );
         }
-
-        //trace ( "\tmyPill=" + myPill );
     }
 
 
-    public function getRandomEmptyBoardPos(): void {
-        empty = new Array();
-        for(i=0; i < this.width; i++) {
-            for(j=0; j< this.height; j++ ) {
-                if ( this.board[i][j] == BRD_EMPTY ) {
+    public function getRandomEmptyBoardPos(): Point {
+        var empty: Array = new Array();
+        for(var i:Number=0; i < this.width; i++) {
+            for(var j:Number=0; j< this.height; j++ ) {
+                if ( this.board[i][j] == Constants.BRD_EMPTY ) {
                     empty.push( new Point(i, j) );
                 }
             }
@@ -263,41 +263,34 @@ package ly.jamie.oiramrd {
     11
     00
     */
-    public function canFall(blk): void {
-        p = blk.position;
+    public function canFall(blk: Block): Boolean {
+        var p: Point = blk.position;
         if ( blk.linkedBlock == null ) {
-            return this.board[p.x][p.y + 1] == BRD_EMPTY;
+            return this.board[p.x][p.y + 1] == Constants.BRD_EMPTY;
         }
         else { // must check extra things for linked block
-            p2 = blk.linkedBlock.position;
+            var p2: Point = blk.linkedBlock.position;
 
-            lower = p2.y > p.y ? p2 : p; // lower
-            higher = lower == p2 ? p: p2;
+            var lower:Point = p2.y > p.y ? p2 : p; // lower
+            var higher: Point = lower == p2 ? p: p2;
 
-            result = this.board[lower.x][lower.y + 1] == BRD_EMPTY && 
-               (this.board[higher.x][higher.y + 1] == BRD_EMPTY || (higher.y + 1 == lower.y));
-
-            // trace(higher + " " + lower);
-            // trace(higher.y + " " + lower.y);
-            // trace(this + ": canFall " + blk + " " + blk.linkedBlock + "? " + result);
-
-
+            var result: Boolean = this.board[lower.x][lower.y + 1] == Constants.BRD_EMPTY && 
+               (this.board[higher.x][higher.y + 1] == Constants.BRD_EMPTY || (higher.y + 1 == lower.y));
 
             return result;
         }
     }
 
-    public function setScore( score ): void {
+    public function setScore( score: Number ): void {
         this.score = score;
         this.display.setScore ( this.score );
     }
 
-    Oiramrd.prototype.addToScore = function ( blocksCleared, chainLevel ) {
-        //trace("ADDING TO SCORE");
+    public function addToScore( blocksCleared: Number, chainLevel: Number ): void {
         this.setScore ( (this.getScore() + blocksCleared * 10 * chainLevel) * this.level );
     }
 
-    public function getScore( ): void {
+    public function getScore( ): Number {
         return this.score;
     }
 
@@ -305,53 +298,46 @@ package ly.jamie.oiramrd {
      * Causes all blocks that can fall due to gravity to fall by one board position.
      */
     public function applyGravity(): void {
-        //trace("ApplyGravity");
-
-        if ( this.blockMatcher == undefined ) {
+        if ( this.blockMatcher == null ) {
             this.blockMatcher = new BlockMatcher ( this );
-            //trace("block matcher created.");
-            //trace("block matcher: " + this.blockMatcher);
         }
 
 
-        for(var x=0; x< this.width; x++) { // iterate over columns 
-            for(var y=this.height-1; y >=0 ; y--) {
-                if (this.mcs[x][y] != undefined) this.mcs[x][y].grav = false;
+        for(var x:Number=0; x< this.width; x++) { // iterate over columns 
+            for(var y:Number=this.height-1; y >=0 ; y--) {
+                if (this.mcs[x][y] != null) {
+                  this.mcs[x][y].grav = false;
+                }
             }
         }
 
-        var numberOfBlocksFallen = 0;
-        for(var x=0; x< this.width; x++) { // iterate over columns 
-            for(var y=this.height-1; y >=0 ; y--) {
-                if( this.board[x][y] == EMPTY || this.board[x][y] == BRD_VIRUS) continue;
-                else if ( this.board[x][y] == BRD_BLOCK && this.canFall( this.mcs[x][y] )) { // block && all blocks above must fall
-                    //trace("\tBlock at " + x + ", " + y + " trying to fall.");
-                    if ( this.mcs[x][y] == undefined ) {
+        var numberOfBlocksFallen: Number = 0;
+        for(x=0; x< this.width; x++) { // iterate over columns 
+            for(y=this.height-1; y >=0 ; y--) {
+                if( this.board[x][y] == Constants.BRD_EMPTY || this.board[x][y] == Constants.BRD_VIRUS) continue;
+                else if ( this.board[x][y] == Constants.BRD_BLOCK && this.canFall( this.mcs[x][y] )) { // block && all blocks above must fall
+                    if ( this.mcs[x][y] == null ) {
                         trace("ERROR!!!!");
                     }
                     else {
-                        blk = this.mcs[x][y];
-                        bb = new BlockBullier();
+                        var blk: Block = this.mcs[x][y];
+                        var bb: BlockBullier = new BlockBullier();
                         if ( ! blk.grav ) {
                             bb.down(this, blk);
                             blk.grav = true;
                             this.display.updateBlock(blk);
-                            //trace(this + ": Moving block " + blk);
 
                             // block has fallen, it becomes a contact point if there are any blocks in the cardinal positions
-                            // if ( blk has neighbors && is not falling) 
                             this.blockMatcher.addContactBlock ( blk );
 
                             numberOfBlocksFallen ++;
 
-                            if ( blk.linkedBlock != undefined && ! blk.linkedBlock.grav) {
+                            if ( blk.linkedBlock != null && ! blk.linkedBlock.grav) {
                                 bb.down(this, blk.linkedBlock);
                                 blk.linkedBlock.grav = true;
 
-                                // if ( blk has neighbors && is at rest)
                                 this.blockMatcher.addContactBlock ( blk.linkedBlock );
                                 this.display.updateBlock(blk.linkedBlock);
-                                //trace(this + ": Moving block " + blk.linkedBlock);
 
                                 numberOfBlocksFallen ++;
                             }
@@ -365,36 +351,30 @@ package ly.jamie.oiramrd {
         // guarantees clearing only after all blocks fallen
         // this can be changed to clear after some blocks have fallen
         if ( numberOfBlocksFallen == 0 ) {
-            //trace("block matcher: " + this.blockMatcher);
-            //trace("contact points=" + this.blockMatcher.getContactBlocks().length);
             if ( this.blockMatcher.getContactBlocks().length > 0 ) {
                 this.blockMatcher.buildSearchGrid();
                 this.blockMatcher.setMatched();
-                var matchedPoints = this.blockMatcher.getMatchedPoints();
+                var matchedPoints: Array = this.blockMatcher.getMatchedPoints();
                 if ( matchedPoints.length > 0 ) {
                     // clear matched
-                    //trace("matched points:");
-                    for ( var i= 0 ; i < matchedPoints.length; i ++ ) {
-                        //trace(matchedPoints[i]);
-                        var p = matchedPoints[i].block.position;
+                    for ( var i: Number= 0 ; i < matchedPoints.length; i ++ ) {
+                        var p: Point = matchedPoints[i].block.position;
                         this.destroyBlock (p.x, p.y);
                     }
-                    this.display.sound.start();
+                    this.display.sound.play();
 
                     this.chainLevel ++;
 
                 } else {
-                    //trace("no matches");
                 }
 
-                //trace("Block Matcher Board");
                 this.blockMatcher.dumpBoard();
 
                 this.blockMatcher = new BlockMatcher ( this ); // reset
                 this.ticksPerStep = 1; // increase speed momentarily to clear all chains
             }
             else {
-                this.ticksPerStep = DEFAULT_TICKSPERSTEP ;
+                this.ticksPerStep = Constants.DEFAULT_TICKSPERSTEP;
                 this.insertNextPill();
 
                 this.chainLevel = 1;
@@ -410,7 +390,7 @@ package ly.jamie.oiramrd {
     /**
      * Tests whther the game is over.
      */
-    public function isGameOver(): void { 
+    public function isGameOver(): Boolean { 
         return this.gameIsOver ;
     }
 
@@ -418,53 +398,43 @@ package ly.jamie.oiramrd {
      * Tests whether move is valid.
      */
 
-    Oiramrd.prototype.canMove = function ( myPill, dir ) {
-        pos1 = myPill.block1.position; pos2 = myPill.block2.position;
+    public function canMove( myPill: Pill, dir: Number ): Boolean {
+        var pos1: Point = myPill.block1.position; 
+        var pos2: Point = myPill.block2.position;
 
-        n1 = new Point(pos1.x, pos1.y);
-        n2 = new Point(pos2.x, pos2.y);
+        var n1: Point = new Point(pos1.x, pos1.y);
+        var n2: Point = new Point(pos2.x, pos2.y);
 
         switch ( dir ) {
-            case DIR_DOWN:
+            case Constants.DIR_DOWN:
                 n1.y ++; n2.y++; break;
-            case DIR_RIGHT:
+            case Constants.DIR_RIGHT:
                 n1.x ++; n2.x ++; break;
-            case DIR_UP:
+            case Constants.DIR_UP:
                 n1.y--; n2.y--; break;
-            case DIR_LEFT:
+            case Constants.DIR_LEFT:
                 n1.x--; n2.x--; break;
         }
 
-
-
-        b1 = (this.board[n1.x][n1.y] == BRD_EMPTY || n1.equals(pos1) || n1.equals(pos2));
-        b2 = (this.board[n2.x][n2.y] == BRD_EMPTY || n2.equals(pos1) || n2.equals(pos2));
-        //trace( "pos1=" + pos1 + " pos2=" + pos2);
-        //trace ( " test b1=" + b1 + " b2=" + b2);
-        result = b1 && b2 ;
-
-        //trace(this + ": canMove myPill=" + myPill + " n1=" + n1 + " n2=" + n2 + "? "+ result);
+        var b1: Boolean = (this.board[n1.x][n1.y] == Constants.BRD_EMPTY || n1.equals(pos1) || n1.equals(pos2));
+        var b2: Boolean = (this.board[n2.x][n2.y] == Constants.BRD_EMPTY || n2.equals(pos1) || n2.equals(pos2));
+        var result: Boolean = b1 && b2 ;
 
         return result;
 
     }
 
-    public function insertNextPill(pos1): void {
-        //trace("insertNextPill begin");
-
+    public function insertNextPill(pos1: Point = null): void {
         if (this.gameIsOver || this.getBlock (1, 1) || this.getBlock (2, 1) ) {
             this.gameIsOver = true;
             return;
         }
 
-        if ( pos1 == undefined ) pos1 = new Point(1, 1);
+        if ( pos1 == null) pos1 = new Point(1, 1);
 
-        if ( this.pf == undefined ) this.pf = new PillFactory();
+        if ( this.pf == null) this.pf = new PillFactory();
 
-        //trace(this + ": Pill factory this.pf = " + this.pf);
-
-        myPill = this.pf.getRandomPill(pos1, false);
-        //trace(this + ": myPill = " + myPill);
+        var myPill: Pill = this.pf.getRandomPill(pos1, false);
 
         this.addPillToBoard(myPill);
 
@@ -472,86 +442,70 @@ package ly.jamie.oiramrd {
         this.blockMatcher.addContactBlock ( myPill.block2 );
     }
 
-    public function setBoardPos(pos, val): void {
+    public function setBoardPos(pos:Point, val:*): void {
         this.board[pos.x][pos.y] = val;
-        //trace(this + ": setBoardPos pos = " + pos + " val = " + val);
     }
 
-    public function setMcsPos(pos, val): void {
+    public function setMcsPos(pos:Point, val:*): void {
         this.mcs[pos.x][ pos.y] = val;
     }
 
-    public function setPill(myPill): void {
-        var p1 = myPill.block1.position;
-        var p2 = myPill.block2.position;
-        this.setBoardPos(p1, BRD_BLOCK);
-        this.setBoardPos(p2, BRD_BLOCK);
+    public function setPill(myPill:Pill): void {
+        var p1: Point = myPill.block1.position;
+        var p2: Point = myPill.block2.position;
+        this.setBoardPos(p1, Constants.BRD_BLOCK);
+        this.setBoardPos(p2, Constants.BRD_BLOCK);
         this.setMcsPos(p1, myPill.block1);
         this.setMcsPos(p2, myPill.block2);
     }
 
-    public function setVirus(virus): void {
-        var p = virus.position;
-        this.setBoardPos(p, BRD_VIRUS);
+    public function setVirus(virus:Block): void {
+        var p:Point = virus.position;
+        this.setBoardPos(p, Constants.BRD_VIRUS);
         this.setMcsPos(p, virus);
     }
 
-    public function addPillToBoard(myPill): void {
-
-
-q
-	
-:w
-
-        //trace(this + ":addPillToBoard myPill= " + myPill);
-
+    public function addPillToBoard(myPill:Pill): void {
         this.setPill(myPill);
 
         this.display.addPillToBoard(myPill);
 
         this.activePill = myPill;
-
-        //trace(this + ": addPillToBoard");
     }
 
-    Oiramrd.prototype.getBlock = function ( x, y ) {
+    public function getBlock( x:Number, y:Number ): Block {
         if ( this.mcs.length <= x || x < 0 || this.mcs[x].length <= y || y < 0 ) return null;
         return this.mcs[x][y];
     }
 
-    Oirmard.prototype.nextLevel = function() {
+    public function nextLevel(): void {
         trace("NEXT LEVEL");
         this.viriiFill ( this.density /= 2 );
         this.level ++;
         this.display.setLevel( this.level );
     }
 
-
-    Oiramrd.prototype.destroyBlock = function ( x, y ) {
-        if ( this.board[x][y] == BRD_VIRUS ) {
+    public function destroyBlock( x:Number, y:Number ): void {
+        if ( this.board[x][y] == Constants.BRD_VIRUS ) {
             this.viriiCount --;
             this.display.setViriiCount ( this.viriiCount );
 
             if ( this.viriiCount <= 0 ) {
-                //this.nextLevel();
                 trace("NEXT LEVEL");
                 this.viriiFill ( this.density *= 2 );
                 this.level ++;
                 this.display.setLevel( this.level );
             }
         }
-        this.board[x][y] = BRD_EMPTY;
-        var block = this.getBlock(x, y);
+        this.board[x][y] = Constants.BRD_EMPTY;
+        var block: Block = this.getBlock(x, y);
         block.breakLinks();
         if ( ! block ) return;
         trace("attempting to destroy block " + block + " with mc " + block.mc);
         this.mcs[x][y] = null;
-        block.mc.removeMovieClip();
+
+        block.mc.parent.removeChild(block.mc);
     }
-
-
-
-    BF = new BlockFactory();
   }
 }
 

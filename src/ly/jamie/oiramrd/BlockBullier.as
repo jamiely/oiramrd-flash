@@ -1,42 +1,38 @@
 package ly.jamie.oiramrd {
-  class BlockBullier {
-    function BlockBullier() {
+  public class BlockBullier {
+    public function BlockBullier() {
     }
 
-    public function toString(): void {
+    public function toString(): String {
         return "<BlockBullier>";
     }
-    public function resetpos(game, blk): void {
-        x = blk.position.x;
-        y = blk.position.y;
+    public function resetpos(game:Oiramrd, blk:Block): void {
+        var x:Number = blk.position.x;
+        var y:Number = blk.position.y;
 
-        game.board[x][y] = BRD_EMPTY;
+        game.board[x][y] = Constants.BRD_EMPTY;
         game.mcs[x][y] = null;
-
-        //trace(this + ": Reseting Position of " + blk);
     }
-    public function down(game, blk): void {
+    public function down(game:Oiramrd, blk:Block): void {
         this.resetpos(game, blk);
         blk.position.y ++;
         this.updateBlock(game, blk);
     }
-    public function right(game, blk): void {
+    public function right(game:Oiramrd, blk:Block): void {
         this.resetpos(game, blk);
         blk.position.x++;
         this.updateBlock(game, blk);
     }
-    public function left(game, blk): void {
+    public function left(game:Oiramrd, blk:Block): void {
         this.resetpos(game, blk);
         blk.position.x--;
         this.updateBlock(game, blk);
     }
-    public function updateBlock(game, blk): void {
-        x = blk.position.x;
-        y = blk.position.y;
-        game.board[x][y] = BRD_BLOCK;
+    public function updateBlock(game:Oiramrd, blk:Block): void {
+        var x:Number = blk.position.x;
+        var y:Number = blk.position.y;
+        game.board[x][y] = Constants.BRD_BLOCK;
         game.mcs[x][y] = blk;
-
-        //trace(this + ": Updating " + blk);
     }
   }
 }

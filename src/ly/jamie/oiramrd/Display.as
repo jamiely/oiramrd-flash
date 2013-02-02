@@ -1,135 +1,118 @@
 package ly.jamie.oiramrd {
 
-  import flash.display.*;
+  import flash.display.MovieClip;
+  import flash.media.Sound;
+  import flash.text.*;
 
-  class Display {
-    var game:Oiramrd;
-    var root:MovieClip;
+  public class Display {
+    private var blockSize: Point;
+    private var game:Oiramrd;
+    private var root:MovieClip;
+    private var updatePositions: Array;
+    public var sound: Sound;
+    public var width: Number;
+    public var height: Number;
+    public var blkdepth: Number;
+    public var block: MovieClip;
+    public var virus: MovieClip;
+    public var origin: *;
+    public var blocks: MovieClip;
+    public var virii: MovieClip;
+    public var grid: MovieClip;
+    public var boardbg: MovieClip;
+    public var board: MovieClip;
+    public var textfields: MovieClip;
+    public var left: Number;
+    public var myformat: TextFormat;
 
-    function Display(game, root) {
+    function Display(game:Oiramrd, root:MovieClip) {
         this.game = game;
         game.display = this;
         this.root = root; // the root mc of the game
         this.updatePositions = new Array();
 
-        this.sound = new Sound(root);
-        this.sound.attachSound("sound_beep");
-        //this.sound.loadSound("sounds/beep.mp3", false);
-        trace( "Display: Root = " + root);
-
-        this.toString = function () {
-            return "<Display root=\"" + this.root + "\">" + this.game + "</Display>";
-        }
+        this.sound = new Sound();
+        //this.sound.attachSound("sound_beep");
+    }
+    public function toString(): String {
+        return "<Display root=\"" + this.root + "\">" + this.game + "</Display>";
     }
 
-    public function updatePill(pill): void {
+    public function updatePill(pill: Pill): void {
         this.updateBlock(pill.block1); this.updateBlock(pill.block2);
     }
 
-    public function updateBlock(blk): void {
+    public function updateBlock(blk: Block): void {
         var b:MovieClip = blk.mc;
         var o:Point = new Point(b.x, b.y);
         b.x = this.blockSize.x * blk.position.x - this.width;
         b.y = this.blockSize.y * blk.position.y - this.height;
     }
 
-    public function addPillToBoard(pill): void {
-        trace(this + ": addPillToBoard")
+    public function addPillToBoard(pill: Pill): void {
         this.addBlockToBoard(pill.block1);
         this.addBlockToBoard(pill.block2);
         this.updatePill(pill);
     }
 
-    public function addBlockToBoard(block): void {
-        if ( this.blkdepth == undefined ) this.blkdepth = 100; 
-
-        var nm: String = "block" + this.blkdepth;
-
-        trace(this + ": addBlockToBoard\nparentTarget = " + this.block._parent._target + " nm = " + nm);
-        this.block.duplicateMovieClip(nm, this.blkdepth);
-        var blk:MovieClip = this.block._parent[nm];
-        block.mc = blk; // link the mc to the block object for easy reference later
-
-
-        myColor = new Color( blk );
-        myColor.setRGB ( SETTINGS.pillColors [ block.colorIndex ] ); 
-
-
-        this.blkdepth ++; 
-
-        trace(this + ": addBlockToBoard\nblk = " + blk);
+    public function addBlockToBoard(block: Block): void {
+        block.mc = this.copyMCWithColorIndex(this.block, block.colorIndex);
     }
 
-    public function addVirusToBoard(virus): void {
-        if ( this.virusdepth == undefined ) this.virusdepth = 100; 
-        nm = "virus" + this.virusdepth;
+    private function copyMC(mc: MovieClip):MovieClip {
+      var newMC:MovieClip = new MovieClip();
+      newMC.graphics.copyFrom(mc.graphics);
+      return newMC;
+    }
 
-        trace(this + ": addVirusToBoard\nparentTarget = " + this.virus._parent._target + " nm = " + nm);
-        this.virus.duplicateMovieClip(nm, this.virusdepth);
-        blk = this.virus._parent[nm];
-        virus.mc = blk; // link the mc to the virus object for easy reference later
+    private function copyMCWithColorIndex(mc: MovieClip, colorIndex: int):MovieClip {
+      var newMC: MovieClip = this.copyMC(mc);
 
-        myColor = new Color( blk );
-        myColor.setRGB ( SETTINGS.pillColors [ virus.colorIndex ] ); 
+      newMC.opaqueBackground = Settings.Shared.pillColors [ colorIndex ];
+      return newMC;
+    }
 
-        this.virusdepth ++; 
+    public function addVirusToBoard(virus: Block): void {
+        virus.mc = this.copyMCWithColorIndex(this.virus, virus.colorIndex);
+    }
 
-        trace(this + ": addVirusToBoard\nblk = " + blk);
+    private function addNewMC(): MovieClip {
+      var mc: MovieClip = new MovieClip();
+      this.root.addChild(mc);
+      return mc;
+    }
+
+    private function newTextField(x: Number, y:Number, width: Number, height: Number): TextField {
+      var txt: TextField = new TextField();
+      this.textfields.addChild(txt);
+      txt.x = x;
+      txt.y = y;
+      txt.width = width;
+      txt.height = height;
+      return txt;
     }
 
     public function initialize(): void {
-        // 
-
-
-        this.root.createEmptyMovieClip("origin", 20);
-        this.origin = this.root.origin;
-
-        this.root.createEmptyMovieClip("blocks", 100);
-
-        this.blocks = this.root.blocks;
-
-        this.root.createEmptyMovieClip("virii", 80);
-        this.virii = this.root.virii;
-
-        this.root.createEmptyMovieClip("grid", 30);
-        this.grid = this.root.grid;
-
-
-        this.root.createEmptyMovieClip("boardbg", 50); // TODO: parameters
-        this.boardbg = this.root.boardbg;
-        this.root.createEmptyMovieClip("board", 60); // TODO: parameters
-        this.board = this.root.board;
-
-
+        this.origin = this.addNewMC();
+        this.grid = this.addNewMC();
+        this.textfields = this.addNewMC();
+        this.boardbg = this.addNewMC();
+        this.board = this.addNewMC();
+        this.virii = this.addNewMC();
+        this.blocks = this.addNewMC();
 
         this.blockSize = new Point(15, 15);
         this.width = this.game.width * this.blockSize.x /2 ;
         this.height = this.game.height * this.blockSize.y / 2;
 
         this.initBlock(); 
-        trace ( "Display: Block Initialized" );
-
         this.initVirus();
-        trace ( "Display: Virus Initialized" );
-
         this.drawBoard();
-
-        trace ( "Display: Board Drawn" );
-
-        //this.drawOrigin();
         this.drawGrid();
-
-
-        this.root.createEmptyMovieClip("textfields", 10);
-        this.textfields = this.root.textfields;
 
         this.left = 70;
 
-        this.textfields.createTextField("viriiLeft",1,this.left,-150,50,50);
-        //trace(this.textfields.viriiLeft);
-        // this.textfields.viriiLeft.multiline = true;
-        // this.textfields.viriiLeft.wordWrap = true;
-        // this.textfields.viriiLeft.border = true;
+        this.textfields.viriiLeft = this.newTextField(this.left, -150, 50, 50);
         this.textfields.viriiLeft.autoSize = true;
 
         this.myformat = new TextFormat();
@@ -138,48 +121,44 @@ package ly.jamie.oiramrd {
         this.myformat.bold = true;
         this.myformat.size = 20;
 
-
-        this.textfields.viriiLeft.text = "?";
         this.textfields.viriiLeft.setTextFormat(this.myformat);
+        this.textfields.viriiLeft.text = "?";
 
-        this.textfields.createTextField("lblViriiLeft",2,this.left,-160,50,50);
+        this.textfields.lblViriiLeft = this.newTextField(this.left, -160, 50, 50);
         with ( this.textfields.lblViriiLeft ) {
             text = "Bugs #"
             setTextFormat( new TextFormat("_sans", 10) );
-
         }
 
-        this.textfields.createTextField("lblScore",3,this.left,-110,50,50);
+        this.textfields.lblScore = this.newTextField(this.left, -110, 50, 50);
         with ( this.textfields.lblScore ) {
             text = "Score"
             setTextFormat( new TextFormat("_sans", 10) );
-
         }
 
         this.setViriiCount ( "?" );
 
-        this.textfields.createTextField("score",4,this.left,-100,50,50);
+        this.textfields.score = this.newTextField(this.left, -100, 50, 50);
+        this.setScore ( "?" );
         with ( this.textfields.score ) {
             autoSize = true;
-            this.setScore ( "?" );
             setTextFormat(this.myformat);
         }
 
-        this.textfields.createTextField("lblLevel",5,this.left,-70,50,50);
+        this.textfields.lblLevel = this.newTextField(this.left, -70, 50, 50);
         with ( this.textfields.lblLevel ) {
             text = "level"
             setTextFormat( new TextFormat("_sans", 10) );
         }
 
-        this.textfields.createTextField("level",6,this.left,-60,50,50);
+        this.textfields.level = this.newTextField(this.left, -60, 50, 50);
         with ( this.textfields.level ) {
             autoSize = true;
-            //this.setLevel( 0 );
             setTextFormat(this.myformat);
         }
     }
 
-    public function setLevel(level): void {
+    public function setLevel(level: *): void {
         with ( this.textfields.level ) {
             text = level;
             setTextFormat( this.myformat );
@@ -187,25 +166,24 @@ package ly.jamie.oiramrd {
     }
 
 
-    public function setScore(score): void {
+    public function setScore(score: *): void {
         with ( this.textfields.score ) {
             text = score;
             setTextFormat( this.myformat );
         }
     }
 
-    public function setViriiCount(count): void {
+    public function setViriiCount(count: *): void {
         this.textfields.viriiLeft.text = count;
         this.textfields.viriiLeft.setTextFormat( this.myformat );
     }
 
     public function drawGrid(): void {
-        //w = this.game.width * this.blockSize.x / 2;
-        //h = this.game.height * this.blockSize.y / 2;
-        w = this.width; h = this.height;
+        var w: Number = this.width; 
+        var h: Number = this.height;
 
-        for(i=-w; i<w; i+=this.blockSize.x) {
-            with ( this.grid ) {
+        for(var i:Number=-w; i<w; i+=this.blockSize.x) {
+            with ( this.grid.graphics ) {
                 lineStyle(1, 0xDDDDDD, 50);
                 moveTo(i, -h);
                 lineTo(i, h);
@@ -213,7 +191,7 @@ package ly.jamie.oiramrd {
         }
 
         for(i=-h; i<h; i+=this.blockSize.y) {
-            with ( this.grid ) {
+            with ( this.grid.graphics ) {
                 lineStyle(1, 0xDDDDDD, 50);
                 moveTo(-w, i);
                 lineTo(w, i);
@@ -224,28 +202,30 @@ package ly.jamie.oiramrd {
     }
 
     public function drawOrigin(): void {
-        len = 10;
-        o = this.origin;
-        o.lineStyle(1, 0xCCCCCC, 100);
-        o.moveTo(len, 0);
-        o.lineTo(-len, 0);
-        o.moveTo(0, len);
-        o.lineTo(0, -len);
+        var len:Number = 10;
+        var o:MovieClip = this.origin;
+        o.graphics.lineStyle(1, 0xCCCCCC, 100);
+        o.graphics.moveTo(len, 0);
+        o.graphics.lineTo(-len, 0);
+        o.graphics.moveTo(0, len);
+        o.graphics.lineTo(0, -len);
     }
 
     public function drawBoard(): void {
-        bg = this.boardbg;
-        bw = 1; // border width
-        bc = 0x333333; // border color
-        bg.lineStyle(bw, bc, 80);
-        w = this.width ; h = this.height;
-        dw = this.blockSize.x/2; dh = this.blockSize.y/2;
+        var bg:MovieClip = this.boardbg;
+        var bw:Number = 1; // border width
+        var bc:uint = 0x333333; // border color
+        bg.graphics.lineStyle(bw, bc, 80);
+        var w:Number = this.width ; 
+        var h:Number = this.height;
+        var dw: Number = this.blockSize.x/2; 
+        var dh: Number = this.blockSize.y/2;
 
-        bg.moveTo(-w - dw, -h - dh);
-        bg.lineTo(-w - dw, h - dh);
-        bg.lineTo(w - dw, h - dh);
-        bg.lineTo(w - dw, -h - dh);
-        bg.lineTo(-w -dw, -h - dh);
+        bg.graphics.moveTo(-w - dw, -h - dh);
+        bg.graphics.lineTo(-w - dw, h - dh);
+        bg.graphics.lineTo(w - dw, h - dh);
+        bg.graphics.lineTo(w - dw, -h - dh);
+        bg.graphics.lineTo(-w -dw, -h - dh);
 
         trace("Display.drawBoard: game.width = "  + this.game.width + 
             " game.height = " + this.game.height);
@@ -257,24 +237,23 @@ package ly.jamie.oiramrd {
 
 
     public function update(): void {
-        for(var i=0; i < this.updatePositions.length; i++) {
-            pt = this.updatePositions[i]; // should be a point correspondinng to a board position
-            pos = this.game.board[pt.x][pt.y]; // object defining board position
+        for(var i:Number=0; i < this.updatePositions.length; i++) {
+            var pt: Point = this.updatePositions[i]; // should be a point correspondinng to a board position
+            var pos: Point = this.game.board[pt.x][pt.y]; // object defining board position
         }
     }
 
     public function initBlock(): void {
-        if( this.block == undefined ) { // must generate the first block
-            this.blocks.createEmptyMovieClip("ogblk", 10); // TODO: parameters
-
+        if( this.block == null ) { // must generate the first block
             // DRAW block
-            this.block = this.blocks.ogblk;
+            this.block = new MovieClip();
+            this.blocks.addChild(this.block);
             this.block.x = 40;
-            with ( this.block ) {
+            var w:Number = this.blockSize.x / 2;
+            var h:Number = this.blockSize.y / 2;
+            with ( this.block.graphics ) {
                 lineStyle(1, 0x0000FF, 100);
                 beginFill(0xFFFFFF);
-                w = this.blockSize.x / 2;
-                h = this.blockSize.y / 2;
                 moveTo(-w, -h);
                 lineTo(-w, h);
                 lineTo(w, h);
@@ -282,21 +261,21 @@ package ly.jamie.oiramrd {
                 lineTo(-w, -h);
                 endFill();
             }
-            this.block._visible = false;
+            this.block.visible = false;
         }
     }
 
     public function initVirus(): void {
-        if ( this.virus == undefined ) { 
-            this.virii.createEmptyMovieClip("ogvir", 20); // TODO: parameters
-            this.virus = this.virii.ogvir;
+        if ( this.virus == null ) { 
+            this.virus = new MovieClip();
+            this.virii.addChild(this.virus);
             this.virus.x = 15;
+
+            var w:Number = this.blockSize.x / 2;
+            var h:Number = this.blockSize.y / 2;
 
             with ( this.virus ) {
                 lineStyle(1, 0xFF0000, 100);
-                w = this.blockSize.x / 2;
-                h = this.blockSize.y / 2;
-
                 beginFill(0xFFFFFF);
                 moveTo(0, h);
                 curveTo(w, h, w, 0);
@@ -306,7 +285,7 @@ package ly.jamie.oiramrd {
                 endFill();
             }
 
-            this.virus._visible = false;
+            this.virus.visible = false;
         }
     }
   }

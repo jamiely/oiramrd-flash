@@ -1,6 +1,8 @@
 package ly.jamie.oiramrd{
   class Interface {
   
+    var game:Oiramrd;
+ 
     function Interface(game) {
         this.game = game;
         Key.addListener(this);

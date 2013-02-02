@@ -1,26 +1,26 @@
 package ly.jamie.oiramrd {
-  class Constants {
+  public class Constants {
     /**
      * board constants
      */
-    BRD_EMPTY = 0;
-    BRD_VIRUS = 1;
-    BRD_BLOCK = 2;
+    public static var BRD_EMPTY:Number = 0;
+    public static var BRD_VIRUS:Number = 1;
+    public static var BRD_BLOCK:Number = 2;
 
 
-    DEFAULT_TICKSPERSTEP = 5;
+    public static var DEFAULT_TICKSPERSTEP:Number = 5;
 
 
     /*
      * directional constants
      */
      
-    DIR_UP = 1;
-    DIR_RIGHT = 3;
-    DIR_DOWN = 5;
-    DIR_LEFT = 7;
+    public static var DIR_UP:Number = 1;
+    public static var DIR_RIGHT:Number = 3;
+    public static var DIR_DOWN:Number = 5;
+    public static var DIR_LEFT:Number = 7;
 
-    function getOppositeDirection(dir) {
+    public static function getOppositeDirection(dir:Number):Number {
         switch ( dir ) {
             case DIR_UP: return DIR_DOWN;
             case DIR_DOWN: return DIR_UP;

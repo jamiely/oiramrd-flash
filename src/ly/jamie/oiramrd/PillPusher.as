@@ -1,27 +1,27 @@
 package ly.jamie.oiramrd{
-  class PillPusher{
-    function PillPusher() {
+  public class PillPusher{
+    public function PillPusher() {
 
     }
-    public function down(game, myPill): void {
-        bb = new BlockBullier();
+    public function down(game:Oiramrd, myPill:Pill): void {
+        var bb:BlockBullier = new BlockBullier();
 
         // top most
-        b1 = ( myPill.block1.position.y > myPill.block2.position.y ) ? myPill.block1 : myPill.block2;
+        var b1:Block = ( myPill.block1.position.y > myPill.block2.position.y ) ? myPill.block1 : myPill.block2;
         // bottom most
-        b2 = ( b1 == myPill.block1 ) ? myPill.block2 : myPill.block1;
+        var b2:Block = ( b1 == myPill.block1 ) ? myPill.block2 : myPill.block1;
 
         bb.down(game, b2);
         bb.down(game, b1);
         trace(this + ": Down! myPill = " + myPill);
     }
     public function right(game, myPill): void {
-        bb = new BlockBullier();
+        var bb:BlockBullier = new BlockBullier();
 
         // right most
-        b1 = ( myPill.block1.position.x > myPill.block2.position.x ) ? myPill.block1 : myPill.block2;
+        var b1:Block = ( myPill.block1.position.x > myPill.block2.position.x ) ? myPill.block1 : myPill.block2;
         // left most
-        b2 = ( b1 == myPill.block1 ) ? myPill.block2 : myPill.block1;
+        var b2:Block = ( b1 == myPill.block1 ) ? myPill.block2 : myPill.block1;
 
         // move right most first
         bb.right(game, b1);
@@ -30,12 +30,12 @@ package ly.jamie.oiramrd{
         trace(this + ": Down! myPill = " + myPill);
     }
     public function left(game, myPill): void {
-        bb = new BlockBullier();
+        var bb:BlockBullier = new BlockBullier();
 
         // right most
-        b1 = ( myPill.block1.position.x > myPill.block2.position.x ) ? myPill.block1 : myPill.block2;
+        var b1:Block = ( myPill.block1.position.x > myPill.block2.position.x ) ? myPill.block1 : myPill.block2;
         // left most
-        b2 = ( b1 == myPill.block1 ) ? myPill.block2 : myPill.block1;
+        var b2:Block = ( b1 == myPill.block1 ) ? myPill.block2 : myPill.block1;
 
         // move left most first
         bb.left(game, b2);
@@ -56,15 +56,15 @@ package ly.jamie.oiramrd{
 
         trace ( this + ":rotate myPill=" + myPill + " clcokwise=" + clockwise);
 
-        bb = new BlockBullier();
+        var bb:BlockBullier = new BlockBullier();
         // resets position in global memory and screen
 
         game.dumpBoard();
 
         trace( "\treset block positions block1=" + myPill.block1 + " block2=" +myPill.block2);
-        bb.resetPos(game, myPill.block1);
+        bb.resetpos(game, myPill.block1);
         game.dumpBoard();
-        bb.resetPos(game, myPill.block2);
+        bb.resetpos(game, myPill.block2);
         game.dumpBoard();
 
         game.rotatePill(myPill, clockwise);
@@ -77,7 +77,7 @@ package ly.jamie.oiramrd{
         game.dumpBoard();
     }
 
-    public function toString(): void {
+    public function toString(): String {
         return "<Pill Pusher>";
     }
   }
