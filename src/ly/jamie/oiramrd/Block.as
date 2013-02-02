@@ -16,7 +16,7 @@ package ly.jamie.oiramrd {
         this.mc = mc;
         this.position = position;
         this.canFall = true;
-        this.grav = false;
+        this.grav = true;
 
         this.linkedBlock = null;
     }

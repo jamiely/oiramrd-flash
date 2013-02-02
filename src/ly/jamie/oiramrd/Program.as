@@ -42,10 +42,15 @@ package ly.jamie.oiramrd {
 
     public function startGame(): void {
         var gameMC:MovieClip = new MovieClip();
+        var self: Program = this;
+
         this.game = gameMC;
         this.addChild(gameMC);
 
         this.oiramrd = new Oiramrd(10, 20);
+        this.oiramrd.debug = function(msg: String) {
+          self.debug.call(self, msg);
+        };
         var INTERFACE:Interface = new Interface(this.oiramrd); 
 
         var DISPLAY:Display = new Display(this.oiramrd, gameMC);
@@ -61,7 +66,6 @@ package ly.jamie.oiramrd {
 
         DISPLAY.setLevel(1);
 
-        var self: Program = this;
         this.boundOnEnterFrame = function(): void {
           self.onEnterFrame.call(self);
         };
@@ -88,7 +92,7 @@ package ly.jamie.oiramrd {
     public function onEnterFrame(): void {
         this.clock ++;
 
-        debug("Clock: " + this.clock);
+        //debug("Clock: " + this.clock + " Ticks per step: " + this.oiramrd.ticksPerStep);
 
         if ( this.oiramrd.isGameOver() ) {
             var tf: TextField = new TextField();
@@ -108,6 +112,7 @@ package ly.jamie.oiramrd {
             this.game = null;
         } else if ( this.clock % this.oiramrd.ticksPerStep == 0 )  {
           this.oiramrd.applyGravity();
+          debug("Gravity");
         }
     }
   }

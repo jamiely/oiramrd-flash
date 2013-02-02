@@ -19,6 +19,7 @@ package ly.jamie.oiramrd {
     public var display: Display;
     private var pf: PillFactory;
     private var activePill: Pill;
+    public var debug: Function;
 
     /**
      * This is the main class
@@ -302,7 +303,6 @@ package ly.jamie.oiramrd {
             this.blockMatcher = new BlockMatcher ( this );
         }
 
-
         for(var x:Number=0; x< this.width; x++) { // iterate over columns 
             for(var y:Number=this.height-1; y >=0 ; y--) {
                 if (this.mcs[x][y] != null) {
@@ -351,6 +351,7 @@ package ly.jamie.oiramrd {
         // guarantees clearing only after all blocks fallen
         // this can be changed to clear after some blocks have fallen
         if ( numberOfBlocksFallen == 0 ) {
+            debug("blocks fallen=" + numberOfBlocksFallen);
             if ( this.blockMatcher.getContactBlocks().length > 0 ) {
                 this.blockMatcher.buildSearchGrid();
                 this.blockMatcher.setMatched();
@@ -376,6 +377,7 @@ package ly.jamie.oiramrd {
             else {
                 this.ticksPerStep = Constants.DEFAULT_TICKSPERSTEP;
                 this.insertNextPill();
+                debug("INSERT PILL");
 
                 this.chainLevel = 1;
             }
@@ -430,9 +432,13 @@ package ly.jamie.oiramrd {
             return;
         }
 
-        if ( pos1 == null) pos1 = new Point(1, 1);
+        if ( pos1 == null) {
+          pos1 = new Point(1, 1);
+        }
 
-        if ( this.pf == null) this.pf = new PillFactory();
+        if ( this.pf == null) {
+          this.pf = new PillFactory();
+        }
 
         var myPill: Pill = this.pf.getRandomPill(pos1, false);
 
@@ -466,6 +472,7 @@ package ly.jamie.oiramrd {
     }
 
     public function addPillToBoard(myPill:Pill): void {
+      debug("addPillToBoard");
         this.setPill(myPill);
 
         this.display.addPillToBoard(myPill);

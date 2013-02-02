@@ -62,6 +62,7 @@ package ly.jamie.oiramrd {
     private function copyMC(mc: MovieClip):MovieClip {
       var newMC:MovieClip = new MovieClip();
       newMC.graphics.copyFrom(mc.graphics);
+      this.root.addChild(newMC);
       return newMC;
     }
 
@@ -258,7 +259,7 @@ package ly.jamie.oiramrd {
                 lineTo(-w, -h);
                 endFill();
             }
-            this.block.visible = false;
+            this.block.visible = true;
         }
     }
 
@@ -284,7 +285,7 @@ package ly.jamie.oiramrd {
             endFill();
         }
 
-        this.virus.visible = false;
+        this.virus.visible = true;
     }
   }
 }
