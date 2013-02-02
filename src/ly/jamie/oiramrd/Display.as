@@ -259,7 +259,7 @@ package ly.jamie.oiramrd {
                 lineTo(-w, -h);
                 endFill();
             }
-            this.block.visible = true;
+            this.block.visible = false;
         }
     }
 
@@ -285,7 +285,7 @@ package ly.jamie.oiramrd {
             endFill();
         }
 
-        this.virus.visible = true;
+        this.virus.visible = false;
     }
   }
 }

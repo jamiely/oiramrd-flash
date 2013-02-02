@@ -11,8 +11,8 @@ package ly.jamie.oiramrd {
     private var txtDebug: TextField;
 
     public function Program() {
-      this.drawBackground();
-      debug("Background drawn");
+      //this.drawBackground();
+      //debug("Background drawn");
       try {
         this.startGame();
         debug("Game started");
@@ -48,7 +48,7 @@ package ly.jamie.oiramrd {
         this.addChild(gameMC);
 
         this.oiramrd = new Oiramrd(10, 20);
-        this.oiramrd.debug = function(msg: String) {
+        this.oiramrd.debug = function(msg: String): void {
           self.debug.call(self, msg);
         };
         var INTERFACE:Interface = new Interface(this.oiramrd); 
@@ -67,7 +67,12 @@ package ly.jamie.oiramrd {
         DISPLAY.setLevel(1);
 
         this.boundOnEnterFrame = function(): void {
+          try {
           self.onEnterFrame.call(self);
+          }
+          catch(ex: *) {
+            debug("Exception in enter frame : " + ex.message);
+          }
         };
         this.addEventListener(Event.ENTER_FRAME, this.boundOnEnterFrame);
     }
@@ -95,6 +100,7 @@ package ly.jamie.oiramrd {
         //debug("Clock: " + this.clock + " Ticks per step: " + this.oiramrd.ticksPerStep);
 
         if ( this.oiramrd.isGameOver() ) {
+          debug("Game over");
             var tf: TextField = new TextField();
             tf.width = 200;
             tf.height = 200;
@@ -111,8 +117,9 @@ package ly.jamie.oiramrd {
             this.game.parent.removeChild(this.game);
             this.game = null;
         } else if ( this.clock % this.oiramrd.ticksPerStep == 0 )  {
+          debug("Gravity clock=" + this.clock);
           this.oiramrd.applyGravity();
-          debug("Gravity");
+        } else {
         }
     }
   }

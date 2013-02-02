@@ -351,7 +351,6 @@ package ly.jamie.oiramrd {
         // guarantees clearing only after all blocks fallen
         // this can be changed to clear after some blocks have fallen
         if ( numberOfBlocksFallen == 0 ) {
-            debug("blocks fallen=" + numberOfBlocksFallen);
             if ( this.blockMatcher.getContactBlocks().length > 0 ) {
                 this.blockMatcher.buildSearchGrid();
                 this.blockMatcher.setMatched();
