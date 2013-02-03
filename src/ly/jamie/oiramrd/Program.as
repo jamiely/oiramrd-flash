@@ -9,6 +9,7 @@ package ly.jamie.oiramrd {
     private var clock: Number;
     private var oiramrd: Oiramrd;
     private var txtDebug: TextField;
+    private var isPaused: Boolean = false;
 
     public function Program() {
       //this.drawBackground();
@@ -26,6 +27,7 @@ package ly.jamie.oiramrd {
       if(!this.txtDebug) {
         this.txtDebug = new TextField();
         this.txtDebug.width = 400;
+        this.txtDebug.height = 800;
         this.txtDebug.x = 200;
         this.txtDebug.opaqueBackground = 0xeeeeee;
         this.addChild(this.txtDebug);
@@ -38,6 +40,10 @@ package ly.jamie.oiramrd {
       g.beginFill(0xff0000);
       g.drawRect(0, 0, 500, 500);
       g.endFill();
+    }
+
+    private function paused(): void {
+      this.isPaused = ! this.isPaused;
     }
 
     public function startGame(): void {
@@ -55,6 +61,7 @@ package ly.jamie.oiramrd {
 
         var INTERFACE:Interface = new Interface(this.oiramrd, gameMC); 
         INTERFACE.trace = boundDebug;
+        INTERFACE.paused = function(): void { self.paused(); };
 
         var DISPLAY:Display = new Display(this.oiramrd, gameMC);
         gameMC.x = 85;
@@ -98,6 +105,8 @@ package ly.jamie.oiramrd {
     }
 
     public function onEnterFrame(): void {
+      if(this.isPaused) return;
+
         this.clock ++;
 
         //debug("Clock: " + this.clock + " Ticks per step: " + this.oiramrd.ticksPerStep);

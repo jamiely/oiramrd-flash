@@ -9,6 +9,7 @@ package ly.jamie.oiramrd{
     private var ap: Pill;
     private var pp: PillPusher;
     public var trace: Function;
+    public var paused: Function = function(): void {};
  
     public function Interface(game: Oiramrd, root: MovieClip) {
         this.game = game;
@@ -24,6 +25,11 @@ package ly.jamie.oiramrd{
 
     public function onKeyboardDown(e: KeyboardEvent): void {
         switch ( e.charCode ) {
+          case "p".charCodeAt(0):
+          case "P".charCodeAt(0):
+            this.paused();
+            break;
+
             case "g".charCodeAt(0):
                 // this.game.step();
                 // trace(this + ": stepped!");
