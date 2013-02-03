@@ -63,6 +63,7 @@ package ly.jamie.oiramrd {
         var INTERFACE:Interface = new Interface(this.oiramrd, gameMC); 
         INTERFACE.trace = boundDebug;
         INTERFACE.paused = function(): void { self.paused(); };
+        INTERFACE.step = function(): void { self.oiramrd.applyGravity(); }
 
         var DISPLAY:Display = new Display(this.oiramrd, gameMC);
         gameMC.x = 85;

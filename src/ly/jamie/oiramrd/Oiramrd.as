@@ -20,6 +20,7 @@ package ly.jamie.oiramrd {
     private var pf: PillFactory;
     public var activePill: Pill;
     public var debug: Function;
+    private var clock: Number;
 
     /**
      * This is the main class
@@ -32,6 +33,7 @@ package ly.jamie.oiramrd {
         this.minimumBlocksToClear = 4;
         this.ticksPerStep = Constants.DEFAULT_TICKSPERSTEP ;
         this.viriiCount = 0;
+        this.clock = 0;
         this.density = 0;
         this.level = 1;
         this.gameIsOver = false;
@@ -377,13 +379,17 @@ package ly.jamie.oiramrd {
     }
 
     private function getMatchedPointsFromFreshBlockMatcher(): Array {
-      debug("getMatchedPointsFromFreshBlockMatcher: Contact blocks: " + this.blockMatcher.getContactBlocks().length);
+      debug("getMatchedPointsFromFreshBlockMatcher: Contact blocks: " 
+            + this.blockMatcher.getContactBlocks().length);
       this.blockMatcher.buildSearchGrid();
       this.blockMatcher.setMatched();
+
       debug("getMatchedPointsFromFreshBlockMatcher: setMatched completed");
 
       var matchedPoints: Array = this.blockMatcher.getMatchedPoints();
-      debug("getMatchedPointsFromFreshBlockMatcher Matched points: " + matchedPoints.length);
+      debug("getMatchedPointsFromFreshBlockMatcher Matched points: " 
+            + matchedPoints.length);
+
       return matchedPoints;
     }
 
@@ -420,25 +426,34 @@ package ly.jamie.oiramrd {
         this.blockMatcher = this.newBlockMatcher();
       }
 
-      debug("***********************************apply gravity");
+      this.clock ++;
+      debug("***********************************apply gravity CLOCK=" + this.clock);
 
       this.stopApplyingGravity();
 
-      var numberOfBlocksFalling: Number = this.countNumberOfBlocksThatCanFall();
-      // guarantees clearing only after all blocks fallen
-      // this can be changed to clear after some blocks have fallen
-      if (numberOfBlocksFalling != 0) {return;}
+      debug("Check for falling blocks");
+      if(this.countNumberOfBlocksThatCanFall() != 0) {
+        // guarantees clearing only after all blocks fallen
+        // this can be changed to clear after some blocks have fallen
+        debug("There are still falling blocks.");
+        return;
+      }
 
+      debug("There are no falling blocks--resolve");
       this.resolveGridWithNoFallingBlocks();
     }
 
     private function resolveGridWithNoFallingBlocks(): void {
+      debug("resolveGridWithNoFallingBlocks start");
       if ( this.blockMatcher.getContactBlocks().length > 0 ) {
+        debug("resolveGridWithNoFallingBlocks: There are contact points");
         this.resolveMatchedPoints();
       }
       else {
+        debug("resolveGridWithNoFallingBlocks: There are no contact points. Release PILL");
         this.nextPill();
       }
+      debug("resolveGridWithNoFallingBlocks end");
     }
 
     private function nextPill(): void {
