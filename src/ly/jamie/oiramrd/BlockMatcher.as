@@ -19,6 +19,7 @@ package ly.jamie.oiramrd {
     }
 
     private function setMatchesAtPoint(cp: Point): void {
+      this.trace("Set matches at point: " + cp);
       var target: SearchedBlock = this.searchGrid [ cp.x ] [ cp.y ];
       var directions:Array = new Array(Constants.DIR_UP, Constants.DIR_LEFT);
 
@@ -29,6 +30,7 @@ package ly.jamie.oiramrd {
     }
 
     private function setMatchesInDirection(target: SearchedBlock, d: Number): void {
+      this.trace("setMatchesInDirection: " + d + " Target=" + target);
       var matches: Array = new Array();
       matches.concat(this.retrieveMatches(target, d));
 
@@ -36,51 +38,46 @@ package ly.jamie.oiramrd {
       matches.concat(this.retrieveMatches(target, d));
 
       matches.push ( target );
+      this.trace("setMatchesInDirection match count=" + matches.length);
 
-      if ( matches.length >= this.game.minimumBlocksToClear ) {
-          this.trace ("\BlockMatched.setMatched: setting blocks as matched:\n" + matches.join("\n"));
-          for ( var k: Number = 0 ; k < matches.length; k ++ ) {
-              matches[k].matched = true;
-          }
-          trace ( "ATTEMPTING TO ADD TO SCORE ");
-          this.game.addToScore ( matches.length, this.game.chainLevel );
-      }
-      else {
-          // did not meet minimum, do nothing
+      if ( matches.length < this.game.minimumBlocksToClear ) {
+        return;
       }
 
+      for ( var k: Number = 0 ; k < matches.length; k ++ ) {
+          matches[k].matched = true;
+      }
+      this.game.addToScore ( matches.length, this.game.chainLevel );
     }
 
     private function retrieveMatches(target: SearchedBlock, d:Number): Array {
       var neighbor:SearchedBlock = target;
-      var iterations: Number = 0;
-      var MAX_ITERATIONS: Number = 30;
       var matches: Array = new Array();
       while ( neighbor ) {
-        if(iterations > MAX_ITERATIONS) {
-          break;
-        }
-
         neighbor = this.findNeighboringBlock(target, d);
         if(neighbor) {
           matches.push ( neighbor );
         }
-
-        iterations ++;
       }
       return matches;
     }
 
     private function findNeighboringBlock(target: SearchedBlock, d:Number): SearchedBlock {
-      var neighbor: SearchedBlock = this.getNeighboringBlock ( neighbor, d );
-      if ( ! neighbor ) return null;
+      var neighbor: SearchedBlock = this.getNeighboringBlock ( target, d );
+      if ( ! neighbor ) {
+        this.trace("No neighbor");
+        return null;
+      }
 
       if ( neighbor.searched [ d ] ) {
+        this.trace("searched");
         return null; // must not have already been searched
       } else if ( neighbor.block 
                && neighbor.block.colorIndex != target.block.colorIndex ) {
+        this.trace("not the same color");
         return null; // must be the same color
       } else if ( neighbor.matched ) {
+        this.trace("matched");
         // must not have been matched. theoretically, would never reach here, 
         // b/c if matched, then searched.
         return null;
@@ -88,18 +85,19 @@ package ly.jamie.oiramrd {
 
       // already searched in this direction
       neighbor.searched [ d ] = true;
+      this.trace("Found neighbor");
 
       return neighbor;
     }
 
     public function setMatched(): void {
+      this.trace("setMatched with contactPoints: " + this.contactPoints);
       for ( var i:Number = 0; i < this.contactPoints.length; i ++ ) {
         setMatchesAtPoint(this.contactPoints [ i ].position);
       }
     }
 
     public function getMatchedPoints(): Array {
-        this.trace ( "BlockMatcher.getMatchedPoints: Begin" );
         var matched:Array = new Array();
 
         for(var i:Number=0; i < this.game.width; i ++ ) {
@@ -140,16 +138,19 @@ package ly.jamie.oiramrd {
     */
     public function getNeighboringBlock( targetBlock: SearchedBlock, 
                                         dir: Number ): SearchedBlock {
-      if(!targetBlock) return null;
+      if(!targetBlock) {
+        this.trace("getNeighboringBlock: Target block doesn't exist")
+        return null;
+      }
 
       var pt: Point = targetBlock.block.position,
           x:Number = 0,
           y: Number = 0;
 
-      if(!pt) return null;
+      if(!pt) throw new Error("getNeighboringBlock: Block has no position");
 
       var newPt: Point = pointFromDirection(pt, dir);
-      if(!newPt) return null;
+      if(!newPt) throw new Error("getNeighboringBlock: couldn't get point from direction");
 
       return this.searchBlockAt(newPt);
     }

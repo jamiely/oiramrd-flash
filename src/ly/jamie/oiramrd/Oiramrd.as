@@ -358,9 +358,11 @@ package ly.jamie.oiramrd {
         // this can be changed to clear after some blocks have fallen
         if ( numberOfBlocksFallen == 0 ) {
             if ( this.blockMatcher.getContactBlocks().length > 0 ) {
+              debug("Contact blocks: " + this.blockMatcher.getContactBlocks().length);
                 this.blockMatcher.buildSearchGrid();
                 this.blockMatcher.setMatched();
                 var matchedPoints: Array = this.blockMatcher.getMatchedPoints();
+                debug("Matched points: " + matchedPoints.length);
                 if ( matchedPoints.length > 0 ) {
                     // clear matched
                     for ( var i: Number= 0 ; i < matchedPoints.length; i ++ ) {
@@ -477,7 +479,6 @@ package ly.jamie.oiramrd {
     }
 
     public function addPillToBoard(myPill:Pill): void {
-      debug("addPillToBoard");
         this.setPill(myPill);
 
         this.display.addPillToBoard(myPill);
@@ -498,7 +499,6 @@ package ly.jamie.oiramrd {
     }
 
     public function destroyBlock( x:Number, y:Number ): void {
-      debug("Destroy");
         if ( this.board[x][y] == Constants.BRD_VIRUS ) {
             this.viriiCount --;
             this.display.setViriiCount ( this.viriiCount );
@@ -514,7 +514,6 @@ package ly.jamie.oiramrd {
         var block: Block = this.getBlock(x, y);
         block.breakLinks();
         if ( ! block ) return;
-        trace("attempting to destroy block " + block + " with mc " + block.mc);
         this.mcs[x][y] = null;
 
         block.mc.parent.removeChild(block.mc);

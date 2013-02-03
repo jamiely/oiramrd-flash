@@ -25,7 +25,7 @@ package ly.jamie.oiramrd {
     private function debug(msg: String): void {
       if(!this.txtDebug) {
         this.txtDebug = new TextField();
-        this.txtDebug.width = 300;
+        this.txtDebug.width = 400;
         this.txtDebug.x = 200;
         this.txtDebug.opaqueBackground = 0xeeeeee;
         this.addChild(this.txtDebug);
@@ -71,7 +71,7 @@ package ly.jamie.oiramrd {
 
         this.boundOnEnterFrame = function(): void {
           try {
-          self.onEnterFrame.call(self);
+            self.onEnterFrame.call(self);
           }
           catch(ex: *) {
             debug("Exception in enter frame : " + ex.message);
