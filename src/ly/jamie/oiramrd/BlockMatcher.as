@@ -34,10 +34,10 @@ package ly.jamie.oiramrd {
     private function setMatchesInDirection(target: SearchedBlock, d: Number): void {
       this.trace("setMatchesInDirection: " + d + " Target=" + target);
       var matches: Array = new Array();
-      matches.concat(this.retrieveMatches(target, d));
+      matches = matches.concat(this.retrieveMatches(target, d));
 
       d = Constants.getOppositeDirection( d );
-      matches.concat(this.retrieveMatches(target, d));
+      matches = matches.concat(this.retrieveMatches(target, d));
 
       matches.push ( target );
       this.trace("setMatchesInDirection match count=" + matches.length);
