@@ -22,6 +22,7 @@ package ly.jamie.oiramrd {
     public var grid: MovieClip;
     public var boardbg: MovieClip;
     public var board: MovieClip;
+    public var cellNumbering: MovieClip;
     public var textfields: MovieClip;
     public var left: Number;
     public var myformat: TextFormat;
@@ -88,12 +89,86 @@ package ly.jamie.oiramrd {
       return txt;
     }
 
+
+    private function createCellNumbering(): void {
+        var w: Number = this.width; 
+        var h: Number = this.height;
+
+        var tf: TextFormat = new TextFormat("_sans", 6);
+        var r:Number = 0, c:Number = 0;
+        for(var i:Number=-w; i<w; i+=this.blockSize.x) {
+          c = 0;
+          for(var j:Number=-h; j<h; j+=this.blockSize.y) {
+            var txt: TextField = new TextField();
+            txt.defaultTextFormat = tf;
+            txt.text = r + "," + c;
+            txt.x = i;
+            txt.y = j;
+            txt.textColor = 0xcccccc;
+            txt.width = this.blockSize.x;
+            txt.height = this.blockSize.y;
+            this.cellNumbering.addChild(txt);
+            c++;
+          }
+          r++;
+        }
+
+        r = 0;
+        for(i = -w; i<w; i+= this.blockSize.x) {
+            txt = new TextField();
+            txt.defaultTextFormat = tf;
+            txt.text = r + "";
+            txt.x = i;
+            txt.y = this.height;
+            txt.width = this.blockSize.x;
+            txt.height = this.blockSize.y;
+            this.cellNumbering.addChild(txt);
+
+            txt = new TextField();
+            txt.defaultTextFormat = tf;
+            txt.text = r + "";
+            txt.x = i;
+            txt.y = -this.height - this.blockSize.y;
+            txt.width = this.blockSize.x;
+            txt.height = this.blockSize.y;
+            this.cellNumbering.addChild(txt);
+            r++;
+        }
+
+        r = 0;
+        for(i = -h; i<h; i+= this.blockSize.y) {
+            txt = new TextField();
+            txt.defaultTextFormat = tf;
+            txt.text = r + "";
+            txt.x = - this.width - this.blockSize.x;
+            txt.y = i;
+            txt.width = this.blockSize.x;
+            txt.height = this.blockSize.y;
+            this.cellNumbering.addChild(txt);
+
+            txt = new TextField();
+            txt.defaultTextFormat = tf;
+            txt.text = r + "";
+            txt.x = this.width;
+            txt.y = i;
+            txt.width = this.blockSize.x;
+            txt.height = this.blockSize.y;
+            this.cellNumbering.addChild(txt);
+
+            r++;
+        }
+        this.cellNumbering.x = -this.blockSize.x/2.0;
+        this.cellNumbering.y = -this.blockSize.y/2.0;
+    }
+
     public function initialize(): void {
         this.origin = this.addNewMC();
         this.grid = this.addNewMC();
         this.textfields = this.addNewMC();
         this.boardbg = this.addNewMC();
         this.board = this.addNewMC();
+        this.cellNumbering = this.addNewMC();
+
         this.virii = this.addNewMC();
         this.blocks = this.addNewMC();
 
@@ -105,6 +180,7 @@ package ly.jamie.oiramrd {
         this.initVirus();
         this.drawBoard();
         this.drawGrid();
+        this.createCellNumbering();
 
         this.left = 70;
 

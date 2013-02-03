@@ -301,6 +301,98 @@ package ly.jamie.oiramrd {
       return bm;
     }
 
+    private function stopApplyingGravity(): void {
+        for(var x:Number=0; x< this.width; x++) { // iterate over columns 
+            for(var y:Number=this.height-1; y >=0 ; y--) {
+                if (this.mcs[x][y] != null) {
+                  this.mcs[x][y].grav = false;
+                }
+            }
+        }
+    }
+
+    private function dropBlockAt(pt: Point): Number {
+      var numberOfBlocksFalling: Number = 0;
+      var blk: Block = this.mcs[pt.x][pt.y];
+      var bb: BlockBullier = new BlockBullier();
+      if ( blk.grav ) return numberOfBlocksFalling;
+
+      bb.down(this, blk);
+      blk.grav = true;
+      this.display.updateBlock(blk);
+
+      // block has fallen, it becomes a contact point if there are any blocks in the cardinal positions
+      this.blockMatcher.addContactBlock ( blk );
+
+      numberOfBlocksFalling ++;
+
+      if ( blk.linkedBlock == null || blk.linkedBlock.grav) return numberOfBlocksFalling;
+
+      bb.down(this, blk.linkedBlock);
+      blk.linkedBlock.grav = true;
+
+      this.blockMatcher.addContactBlock ( blk.linkedBlock );
+      this.display.updateBlock(blk.linkedBlock);
+
+      numberOfBlocksFalling ++;
+
+      return numberOfBlocksFalling;
+    }
+
+    private function isBlockThatCanFallAt(pt: Point): Boolean {
+      return this.board[pt.x][pt.y] == Constants.BRD_BLOCK 
+        && this.canFall( this.mcs[pt.x][pt.y] );
+    }
+
+    private function countNumberOfBlocksThatCanFall(): Number {
+      var numberOfBlocksFalling: Number = 0;
+      for(var x:Number=0; x< this.width; x++) { // iterate over columns 
+          for(var y:Number=this.height-1; y >=0 ; y--) {
+            var pt: Point = new Point(x,y);
+            if (this.isBlockThatCanFallAt(pt)) { // block && all blocks above must fall
+              numberOfBlocksFalling += this.dropBlockAt(pt);
+            }
+          }
+      }
+      return numberOfBlocksFalling;
+    }
+
+    private function getMatchedPointsFromFreshBlockMatcher(): Array {
+      debug("applyGravity: Contact blocks: " + this.blockMatcher.getContactBlocks().length);
+      this.blockMatcher.buildSearchGrid();
+      this.blockMatcher.setMatched();
+      debug("applyGravity: setMatched completed");
+
+      var matchedPoints: Array = this.blockMatcher.getMatchedPoints();
+      debug("applyGravity Matched points: " + matchedPoints.length);
+      return matchedPoints;
+    }
+
+    private function handleMatchedPoints(matchedPoints: Array): void {
+      if ( matchedPoints.length <= 0 ) { return; }
+      //
+      // clear matched
+      for ( var i: Number= 0 ; i < matchedPoints.length; i ++ ) {
+          var p: Point = matchedPoints[i].block.position;
+          this.destroyBlock (p.x, p.y);
+      }
+      // @todo play a sound
+      //this.display.sound.play();
+
+      this.chainLevel ++;
+    }
+
+    private function resolveMatchedPoints(): void {
+      var matchedPoints: Array = this.getMatchedPointsFromFreshBlockMatcher();
+      this.handleMatchedPoints(matchedPoints);
+
+      debug("Chain level set");
+
+      this.blockMatcher = this.newBlockMatcher();
+      this.ticksPerStep = 1; // increase speed momentarily to clear all chains
+      debug("New block matcher created");
+    }
+
     /**
      * Causes all blocks that can fall due to gravity to fall by one board position.
      */
@@ -309,91 +401,32 @@ package ly.jamie.oiramrd {
             this.blockMatcher = this.newBlockMatcher();
         }
 
-        for(var x:Number=0; x< this.width; x++) { // iterate over columns 
-            for(var y:Number=this.height-1; y >=0 ; y--) {
-                if (this.mcs[x][y] != null) {
-                  this.mcs[x][y].grav = false;
-                }
-            }
-        }
+        debug("***********************************apply gravity");
 
-        var numberOfBlocksFallen: Number = 0;
-        for(x=0; x< this.width; x++) { // iterate over columns 
-            for(y=this.height-1; y >=0 ; y--) {
-                if( this.board[x][y] == Constants.BRD_EMPTY || this.board[x][y] == Constants.BRD_VIRUS) continue;
-                else if ( this.board[x][y] == Constants.BRD_BLOCK && this.canFall( this.mcs[x][y] )) { // block && all blocks above must fall
-                    if ( this.mcs[x][y] == null ) {
-                        debug("ERROR!!!!");
-                    }
-                    else {
-                        var blk: Block = this.mcs[x][y];
-                        var bb: BlockBullier = new BlockBullier();
-                        if ( ! blk.grav ) {
-                            bb.down(this, blk);
-                            blk.grav = true;
-                            this.display.updateBlock(blk);
+        this.stopApplyingGravity();
 
-                            // block has fallen, it becomes a contact point if there are any blocks in the cardinal positions
-                            this.blockMatcher.addContactBlock ( blk );
+        var numberOfBlocksFalling: Number = this.countNumberOfBlocksThatCanFall();
+        if (numberOfBlocksFalling != 0) {return;}
 
-                            numberOfBlocksFallen ++;
+        this.resolveGridWithNoFallingBlocks();
+    }
 
-                            if ( blk.linkedBlock != null && ! blk.linkedBlock.grav) {
-                                bb.down(this, blk.linkedBlock);
-                                blk.linkedBlock.grav = true;
+    private function resolveGridWithNoFallingBlocks(): void {
+      // guarantees clearing only after all blocks fallen
+      // this can be changed to clear after some blocks have fallen
+      if ( this.blockMatcher.getContactBlocks().length > 0 ) {
+        this.resolveMatchedPoints();
+      }
+      else {
+        this.nextPill();
+      }
+    }
 
-                                this.blockMatcher.addContactBlock ( blk.linkedBlock );
-                                this.display.updateBlock(blk.linkedBlock);
+    private function nextPill(): void {
+      this.ticksPerStep = Constants.DEFAULT_TICKSPERSTEP;
+      this.insertNextPill();
 
-                                numberOfBlocksFallen ++;
-                            }
-
-                        }
-                    }
-                }
-            }
-        }
-
-        // guarantees clearing only after all blocks fallen
-        // this can be changed to clear after some blocks have fallen
-        if ( numberOfBlocksFallen == 0 ) {
-            if ( this.blockMatcher.getContactBlocks().length > 0 ) {
-              debug("Contact blocks: " + this.blockMatcher.getContactBlocks().length);
-                this.blockMatcher.buildSearchGrid();
-                this.blockMatcher.setMatched();
-                var matchedPoints: Array = this.blockMatcher.getMatchedPoints();
-                debug("Matched points: " + matchedPoints.length);
-                if ( matchedPoints.length > 0 ) {
-                    // clear matched
-                    for ( var i: Number= 0 ; i < matchedPoints.length; i ++ ) {
-                        var p: Point = matchedPoints[i].block.position;
-                        this.destroyBlock (p.x, p.y);
-                    }
-                    // @todo play a sound
-                    //this.display.sound.play();
-
-                    this.chainLevel ++;
-
-                } else {
-                }
-
-                this.blockMatcher.dumpBoard();
-
-                this.blockMatcher = this.newBlockMatcher();
-                this.ticksPerStep = 1; // increase speed momentarily to clear all chains
-            }
-            else {
-                this.ticksPerStep = Constants.DEFAULT_TICKSPERSTEP;
-                this.insertNextPill();
-
-                this.chainLevel = 1;
-            }
-        }
-        else {
-            //trace("Number of blocks fallen: " + numberOfBlocksFallen );
-        }
-
-
+      this.chainLevel = 1;
     }
 
     /**

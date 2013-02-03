@@ -26,11 +26,19 @@ package ly.jamie.oiramrd {
     private function debug(msg: String): void {
       if(!this.txtDebug) {
         this.txtDebug = new TextField();
+        this.txtDebug.defaultTextFormat = new TextFormat("_sans", 8);
         this.txtDebug.width = 400;
         this.txtDebug.height = 800;
         this.txtDebug.x = 200;
         this.txtDebug.opaqueBackground = 0xeeeeee;
         this.addChild(this.txtDebug);
+
+        //var mySb:UIScrollBar = new UIScrollBar(); 
+        //mySb.direction = "horizontal"; 
+        //// Size it to match the text field. 
+        //mySb.setSize(txtDebug.width, txtDebug.height);  
+        //mySb.move(txtDebug.x, txtDebug.height + txtDebug.y); 
+        //mySb.scrollTarget = txtDebug; 
       }
       this.txtDebug.text = msg + "\n" + this.txtDebug.text;
     }

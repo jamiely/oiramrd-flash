@@ -5,6 +5,7 @@ package ly.jamie.oiramrd{
 
   public class Interface {
 
+    private var isPaused: Boolean = false;
     public var game: Oiramrd;
     private var ap: Pill;
     private var pp: PillPusher;
@@ -23,13 +24,21 @@ package ly.jamie.oiramrd{
         return "<Interface>" + this.game + "</Interface>";
     }
 
+    public function onPause(): void {
+      isPaused = !isPaused;
+      this.paused();
+    }
+
     public function onKeyboardDown(e: KeyboardEvent): void {
-        switch ( e.charCode ) {
+      switch(e.charCode) {
           case "p".charCodeAt(0):
           case "P".charCodeAt(0):
-            this.paused();
+            this.onPause();
             break;
+      }
+      if(isPaused) return;
 
+        switch ( e.charCode ) {
             case "g".charCodeAt(0):
                 // this.game.step();
                 // trace(this + ": stepped!");
