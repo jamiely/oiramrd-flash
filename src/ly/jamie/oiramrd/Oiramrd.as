@@ -269,17 +269,16 @@ package ly.jamie.oiramrd {
         if ( blk.linkedBlock == null ) {
             return this.board[p.x][p.y + 1] == Constants.BRD_EMPTY;
         }
-        else { // must check extra things for linked block
-            var p2: Point = blk.linkedBlock.position;
 
-            var lower:Point = p2.y > p.y ? p2 : p; // lower
-            var higher: Point = lower == p2 ? p: p2;
+        var p2: Point = blk.linkedBlock.position;
 
-            var result: Boolean = this.board[lower.x][lower.y + 1] == Constants.BRD_EMPTY && 
-               (this.board[higher.x][higher.y + 1] == Constants.BRD_EMPTY || (higher.y + 1 == lower.y));
+        var lower:Point = p2.y > p.y ? p2 : p; // lower
+        var higher: Point = lower == p2 ? p: p2;
 
-            return result;
-        }
+        var result: Boolean = this.board[lower.x][lower.y + 1] == Constants.BRD_EMPTY && 
+           (this.board[higher.x][higher.y + 1] == Constants.BRD_EMPTY || (higher.y + 1 == lower.y));
+
+        return result;
     }
 
     public function setScore( score: Number ): void {
@@ -312,6 +311,7 @@ package ly.jamie.oiramrd {
     }
 
     private function dropBlockAt(pt: Point): Number {
+      debug("dropBlockAt: startin at pt=" + pt);
       var numberOfBlocksFalling: Number = 0;
       var blk: Block = this.mcs[pt.x][pt.y];
       var bb: BlockBullier = new BlockBullier();
@@ -322,21 +322,40 @@ package ly.jamie.oiramrd {
       this.display.updateBlock(blk);
 
       // block has fallen, it becomes a contact point if there are any blocks in the cardinal positions
-      this.blockMatcher.addContactBlock ( blk );
+      this.addContactBlock ( blk );
 
       numberOfBlocksFalling ++;
 
-      if ( blk.linkedBlock == null || blk.linkedBlock.grav) return numberOfBlocksFalling;
+      //if ( blk.linkedBlock == null || blk.linkedBlock.grav) return numberOfBlocksFalling;
+      if ( blk.linkedBlock == null) {
+        debug("dropBlockAt: no linked block available.");
+        return numberOfBlocksFalling;
+      }
+
+      debug("dropBlockAt: Adding linked block " + blk.linkedBlock + " as contact point");
 
       bb.down(this, blk.linkedBlock);
       blk.linkedBlock.grav = true;
 
-      this.blockMatcher.addContactBlock ( blk.linkedBlock );
+      this.addContactBlock( blk.linkedBlock );
       this.display.updateBlock(blk.linkedBlock);
 
       numberOfBlocksFalling ++;
 
       return numberOfBlocksFalling;
+    }
+
+    private function addContactBlock(blk: Block): void {
+      if(!blk) return;
+
+      debug("addContactBlock start: " + blk);
+
+      var blks: Array = this.blockMatcher.getContactBlocks();
+      for(var i: Number = 0; i<blks.length; i++ ){
+        if(blk.position.equals(blks[i].position)) return;
+      }
+
+      this.blockMatcher.addContactBlock(blk);
     }
 
     private function isBlockThatCanFallAt(pt: Point): Boolean {
@@ -358,13 +377,13 @@ package ly.jamie.oiramrd {
     }
 
     private function getMatchedPointsFromFreshBlockMatcher(): Array {
-      debug("applyGravity: Contact blocks: " + this.blockMatcher.getContactBlocks().length);
+      debug("getMatchedPointsFromFreshBlockMatcher: Contact blocks: " + this.blockMatcher.getContactBlocks().length);
       this.blockMatcher.buildSearchGrid();
       this.blockMatcher.setMatched();
-      debug("applyGravity: setMatched completed");
+      debug("getMatchedPointsFromFreshBlockMatcher: setMatched completed");
 
       var matchedPoints: Array = this.blockMatcher.getMatchedPoints();
-      debug("applyGravity Matched points: " + matchedPoints.length);
+      debug("getMatchedPointsFromFreshBlockMatcher Matched points: " + matchedPoints.length);
       return matchedPoints;
     }
 
@@ -386,34 +405,34 @@ package ly.jamie.oiramrd {
       var matchedPoints: Array = this.getMatchedPointsFromFreshBlockMatcher();
       this.handleMatchedPoints(matchedPoints);
 
-      debug("Chain level set");
+      debug("resolveMatchedPoints: Chain level set");
 
       this.blockMatcher = this.newBlockMatcher();
       this.ticksPerStep = 1; // increase speed momentarily to clear all chains
-      debug("New block matcher created");
+      debug("resolveMatchedPoints: New block matcher created");
     }
 
     /**
      * Causes all blocks that can fall due to gravity to fall by one board position.
      */
     public function applyGravity(): void {
-        if ( this.blockMatcher == null ) {
-            this.blockMatcher = this.newBlockMatcher();
-        }
+      if ( this.blockMatcher == null ) {
+        this.blockMatcher = this.newBlockMatcher();
+      }
 
-        debug("***********************************apply gravity");
+      debug("***********************************apply gravity");
 
-        this.stopApplyingGravity();
+      this.stopApplyingGravity();
 
-        var numberOfBlocksFalling: Number = this.countNumberOfBlocksThatCanFall();
-        if (numberOfBlocksFalling != 0) {return;}
+      var numberOfBlocksFalling: Number = this.countNumberOfBlocksThatCanFall();
+      // guarantees clearing only after all blocks fallen
+      // this can be changed to clear after some blocks have fallen
+      if (numberOfBlocksFalling != 0) {return;}
 
-        this.resolveGridWithNoFallingBlocks();
+      this.resolveGridWithNoFallingBlocks();
     }
 
     private function resolveGridWithNoFallingBlocks(): void {
-      // guarantees clearing only after all blocks fallen
-      // this can be changed to clear after some blocks have fallen
       if ( this.blockMatcher.getContactBlocks().length > 0 ) {
         this.resolveMatchedPoints();
       }
@@ -484,8 +503,8 @@ package ly.jamie.oiramrd {
 
         this.addPillToBoard(myPill);
 
-        this.blockMatcher.addContactBlock ( myPill.block1 );
-        this.blockMatcher.addContactBlock ( myPill.block2 );
+        this.addContactBlock ( myPill.block1 );
+        this.addContactBlock ( myPill.block2 );
     }
 
     public function setBoardPos(pos:Point, val:*): void {
