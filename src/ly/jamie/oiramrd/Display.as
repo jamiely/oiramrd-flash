@@ -3,6 +3,7 @@ package ly.jamie.oiramrd {
   import flash.display.MovieClip;
   import flash.media.Sound;
   import flash.text.*;
+  import flash.geom.ColorTransform;
 
   public class Display {
     private var blockSize: Point;
@@ -56,25 +57,19 @@ package ly.jamie.oiramrd {
     }
 
     public function addBlockToBoard(block: Block): void {
-        block.mc = this.copyMCWithColorIndex(this.block, block.colorIndex);
+      block.mc = this.createBlockWithColor(this.blockColor(block));
     }
 
-    private function copyMC(mc: MovieClip):MovieClip {
-      var newMC:MovieClip = new MovieClip();
-      newMC.graphics.copyFrom(mc.graphics);
-      this.root.addChild(newMC);
-      return newMC;
+    private function blockColor(block: Block): uint {
+      return this.colorAt(block.colorIndex);
     }
 
-    private function copyMCWithColorIndex(mc: MovieClip, colorIndex: int):MovieClip {
-      var newMC: MovieClip = this.copyMC(mc);
-
-      newMC.opaqueBackground = Settings.Shared.pillColors [ colorIndex ];
-      return newMC;
+    private function colorAt(index: int): uint {
+      return Settings.Shared.pillColors[index];
     }
 
     public function addVirusToBoard(virus: Block): void {
-        virus.mc = this.copyMCWithColorIndex(this.virus, virus.colorIndex);
+        virus.mc = this.createVirusWithColor(this.blockColor(virus));
     }
 
     private function addNewMC(): MovieClip {
@@ -196,6 +191,9 @@ package ly.jamie.oiramrd {
             }
         }
 
+        this.grid.x = -this.blockSize.x/2.0;
+        this.grid.y = -this.blockSize.y/2.0;
+
         trace(w)
     }
 
@@ -241,42 +239,42 @@ package ly.jamie.oiramrd {
         }
     }
 
+    public function createBlockWithColor(color: uint): MovieClip {
+      var block: MovieClip = new MovieClip();
+      var w:Number = blockSize.x / 2;
+      var h:Number = blockSize.y / 2;
+      with ( block.graphics ) {
+          lineStyle(0, color, 100);
+          beginFill(color);
+          moveTo(-w, -h);
+          lineTo(-w, h);
+          lineTo(w, h);
+          lineTo(w, -h);
+          lineTo(-w, -h);
+          endFill();
+      }
+      this.blocks.addChild(block);
+      return block;
+    }
     public function initBlock(): void {
         if( this.block == null ) { // must generate the first block
             // DRAW block
-            this.block = new MovieClip();
-            this.blocks.addChild(this.block);
+            this.block = this.createBlockWithColor(0x0000ff);
             this.block.x = 40;
-            var w:Number = this.blockSize.x / 2;
-            var h:Number = this.blockSize.y / 2;
-            with ( this.block.graphics ) {
-                lineStyle(1, 0x0000FF, 100);
-                beginFill(0xFFFFFF);
-                moveTo(-w, -h);
-                lineTo(-w, h);
-                lineTo(w, h);
-                lineTo(w, -h);
-                lineTo(-w, -h);
-                endFill();
-            }
             this.block.visible = false;
         }
     }
 
-    public function initVirus(): void {
-        if ( this.virus )  return; 
-
-        this.virus = new MovieClip();
-        this.virii.addChild(this.virus);
-
-        this.virus.x = 15;
+    public function createVirusWithColor(color: uint): MovieClip {
+        var virus: MovieClip = new MovieClip();
+        this.virii.addChild(virus);
 
         var w:Number = this.blockSize.x / 2;
         var h:Number = this.blockSize.y / 2;
 
-        with ( this.virus.graphics ) {
-            lineStyle(1, 0xFF0000, 100);
-            beginFill(0xFFFFFF);
+        with ( virus.graphics ) {
+            lineStyle(0, color, 100);
+            beginFill(color);
             moveTo(0, h);
             curveTo(w, h, w, 0);
             curveTo(w, -h, 0, -h);
@@ -285,6 +283,14 @@ package ly.jamie.oiramrd {
             endFill();
         }
 
+        return virus;
+    }
+
+    public function initVirus(): void {
+        if ( this.virus )  return; 
+
+        this.virus = this.createVirusWithColor(0xff0000);
+        this.virus.x = 15;
         this.virus.visible = false;
     }
   }
