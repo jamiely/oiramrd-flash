@@ -25,7 +25,7 @@ package ly.jamie.oiramrd {
     private function debug(msg: String): void {
       if(!this.txtDebug) {
         this.txtDebug = new TextField();
-        this.txtDebug.width = 200;
+        this.txtDebug.width = 300;
         this.txtDebug.x = 200;
         this.txtDebug.opaqueBackground = 0xeeeeee;
         this.addChild(this.txtDebug);
@@ -120,7 +120,6 @@ package ly.jamie.oiramrd {
             this.game.parent.removeChild(this.game);
             this.game = null;
         } else if ( this.clock % this.oiramrd.ticksPerStep == 0 )  {
-          debug("Gravity clock=" + this.clock);
           this.oiramrd.applyGravity();
         } else {
         }

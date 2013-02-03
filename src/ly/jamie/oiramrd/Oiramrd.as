@@ -326,7 +326,6 @@ package ly.jamie.oiramrd {
                         debug("ERROR!!!!");
                     }
                     else {
-                      debug("B");
                         var blk: Block = this.mcs[x][y];
                         var bb: BlockBullier = new BlockBullier();
                         if ( ! blk.grav ) {
@@ -358,15 +357,10 @@ package ly.jamie.oiramrd {
         // guarantees clearing only after all blocks fallen
         // this can be changed to clear after some blocks have fallen
         if ( numberOfBlocksFallen == 0 ) {
-          debug("C");
             if ( this.blockMatcher.getContactBlocks().length > 0 ) {
-              debug("D");
                 this.blockMatcher.buildSearchGrid();
-                debug("D0: set matched");
                 this.blockMatcher.setMatched();
-                debug("D1");
                 var matchedPoints: Array = this.blockMatcher.getMatchedPoints();
-                debug("D2");
                 if ( matchedPoints.length > 0 ) {
                     // clear matched
                     for ( var i: Number= 0 ; i < matchedPoints.length; i ++ ) {
@@ -380,7 +374,6 @@ package ly.jamie.oiramrd {
 
                 } else {
                 }
-                debug("E");
 
                 this.blockMatcher.dumpBoard();
 
@@ -388,10 +381,8 @@ package ly.jamie.oiramrd {
                 this.ticksPerStep = 1; // increase speed momentarily to clear all chains
             }
             else {
-              debug("E");
                 this.ticksPerStep = Constants.DEFAULT_TICKSPERSTEP;
                 this.insertNextPill();
-                debug("INSERT PILL");
 
                 this.chainLevel = 1;
             }
