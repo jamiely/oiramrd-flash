@@ -262,6 +262,18 @@ package ly.jamie.oiramrd {
         return empty[Math.floor(Math.random() * empty.length)];
     }
 
+    private function validAt(pt: Point): Boolean {
+      return pt.x >=0 && pt.y >=0 && pt.x < this.board.length 
+        && pt.y < this.board[pt.x].length;
+    }
+
+    private function emptyAt(pt: Point): Boolean {
+      return this.boardAt(pt) == Constants.BRD_EMPTY;
+    }
+
+    private function boardAt(pt: Point): Number {
+      return this.board[pt.x][pt.y];
+    }
     /*
     33
     22
@@ -269,9 +281,12 @@ package ly.jamie.oiramrd {
     00
     */
     public function canFall(blk: Block): Boolean {
+      if(!blk) return false;
+
         var p: Point = blk.position;
         if ( blk.linkedBlock == null ) {
-            return this.board[p.x][p.y + 1] == Constants.BRD_EMPTY;
+          var p1: Point = new Point(p.x, p.y + 1);
+            return this.validAt(p1) && this.emptyAt(p1);
         }
 
         var p2: Point = blk.linkedBlock.position;
@@ -279,8 +294,11 @@ package ly.jamie.oiramrd {
         var lower:Point = p2.y > p.y ? p2 : p; // lower
         var higher: Point = lower == p2 ? p: p2;
 
-        var result: Boolean = this.board[lower.x][lower.y + 1] == Constants.BRD_EMPTY && 
-           (this.board[higher.x][higher.y + 1] == Constants.BRD_EMPTY || (higher.y + 1 == lower.y));
+        var a: Point = new Point(lower.x, lower.y + 1);
+        var b: Point = new Point(higher.x, higher.y + 1);
+        var result: Boolean =  
+          this.validAt(a) && this.emptyAt(a)
+          && (this.validAt(b) && (this.emptyAt(b) || b.y == lower.y));
 
         return result;
     }
@@ -315,52 +333,29 @@ package ly.jamie.oiramrd {
       return this.mcs[pt.x][pt.y];
     }
 
-    private function dropBlockAt(pt: Point): Number {
+    private function dropBlockAt(pt: Point): Boolean {
       debug("dropBlockAt: startin at pt=" + pt);
-      var numberOfBlocksFalling: Number = 0;
       var blk: Block = this.mcs[pt.x][pt.y];
-      var bb: BlockBullier = new BlockBullier();
-      if ( blk.grav ) return numberOfBlocksFalling;
+      if(! blk || blk.grav) return false;
 
+      var bb: BlockBullier = new BlockBullier();
       bb.down(this, blk);
       blk.grav = true;
       this.display.updateBlock(blk);
 
       // block has fallen, it becomes a contact point if there are any blocks in the cardinal positions
-      this.addContactBlock ( blk );
-
-      numberOfBlocksFalling ++;
-
       //if ( blk.linkedBlock == null || blk.linkedBlock.grav) return numberOfBlocksFalling;
-      if ( blk.linkedBlock == null) {
+      if ( blk.linkedBlock == null || blk.linkedBlock.grav) {
         debug("dropBlockAt: no linked block available.");
-        return numberOfBlocksFalling;
+        return true;
       }
-
-      debug("dropBlockAt: Adding linked block " + blk.linkedBlock + " as contact point");
 
       bb.down(this, blk.linkedBlock);
       blk.linkedBlock.grav = true;
 
-      this.addContactBlock( blk.linkedBlock );
       this.display.updateBlock(blk.linkedBlock);
 
-      numberOfBlocksFalling ++;
-
-      return numberOfBlocksFalling;
-    }
-
-    private function addContactBlock(blk: Block): void {
-      if(!blk) return;
-
-      debug("addContactBlock start: " + blk);
-
-      var blks: Array = this.blockMatcher.getContactBlocks();
-      for(var i: Number = 0; i<blks.length; i++ ){
-        if(blk.position.equals(blks[i].position)) return;
-      }
-
-      this.blockMatcher.addContactBlock(blk);
+      return true;
     }
 
     public function allPositions(): Array {
@@ -385,21 +380,21 @@ package ly.jamie.oiramrd {
     }
 
     private function isBlockThatCanFallAt(pt: Point): Boolean {
-      return this.board[pt.x][pt.y] == Constants.BRD_BLOCK 
+      return this.boardAt(pt) == Constants.BRD_BLOCK 
         && this.canFall( this.mcs[pt.x][pt.y] );
     }
 
-    private function countNumberOfBlocksThatCanFall(): Number {
-      var numberOfBlocksFalling: Number = 0;
+    private function areBlocksFalling(): Boolean {
+      var blocksFalling: Boolean = false;
       for(var x:Number=0; x< this.width; x++) { // iterate over columns 
           for(var y:Number=this.height-1; y >=0 ; y--) {
             var pt: Point = new Point(x,y);
             if (this.isBlockThatCanFallAt(pt)) { // block && all blocks above must fall
-              numberOfBlocksFalling += this.dropBlockAt(pt);
+              blocksFalling = blocksFalling || this.dropBlockAt(pt) > 0;
             }
           }
       }
-      return numberOfBlocksFalling;
+      return blocksFalling;
     }
 
     /**
@@ -412,17 +407,23 @@ package ly.jamie.oiramrd {
       this.stopApplyingGravity();
 
       debug("Check for falling blocks");
-      if(this.countNumberOfBlocksThatCanFall() != 0) {
-        // guarantees clearing only after all blocks fallen
-        // this can be changed to clear after some blocks have fallen
-        debug("There are still falling blocks.");
-        return;
+      try {
+        if(this.areBlocksFalling()) {
+          // guarantees clearing only after all blocks fallen
+          // this can be changed to clear after some blocks have fallen
+          debug("There are still falling blocks.");
+          return;
+        }
+      } catch(ex: Error) {
+        debug("Problem with falling blocks: " + ex.message);
       }
 
-      debug("There are no falling blocks--resolve");
+
       try {
         var matchedBlocks: Array = matcher.getAllMatchBlocks();
-        debug("applyGravity: matcher allMatchBlocks=" + matchedBlocks);
+        for each(var matchedBlock: Block in matchedBlocks) {
+          this.destroyBlock(matchedBlock.position.x, matchedBlock.position.y);
+        }
         this.nextPill();
       } catch(ex: Error) {
         debug("Problem matching blocks: " + ex.message);
@@ -490,9 +491,6 @@ package ly.jamie.oiramrd {
         var myPill: Pill = this.pf.getRandomPill(pos1, false);
 
         this.addPillToBoard(myPill);
-
-        this.addContactBlock ( myPill.block1 );
-        this.addContactBlock ( myPill.block2 );
     }
 
     public function setBoardPos(pos:Point, val:*): void {

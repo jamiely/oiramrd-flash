@@ -107,8 +107,8 @@ package ly.jamie.oiramrd{
                 // }
                 // break;
             case Keyboard.DOWN:
-                this.game.step(); // alternate down
-                break;
+              this.game.step();
+              break;
             case Keyboard.UP:
                 if ( this.game.canRotate(ap, true) ) {
                     pp.clockwise(this.game, ap);

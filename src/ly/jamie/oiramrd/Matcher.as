@@ -1,5 +1,6 @@
 package ly.jamie.oiramrd {
   // Matches blocks
+  import flash.utils.Dictionary;
   public class Matcher {
     private var matchMin: Number = 4;
     private static var VERTICAL: Number = 99;
@@ -35,7 +36,8 @@ package ly.jamie.oiramrd {
           matchBlocks = matchBlocks.concat(axisBlocks);
         }
       }
-      return this.uniqueBlocks(matchBlocks);
+      return matchBlocks;
+      //return this.uniqueBlocks(matchBlocks);
     }
 
     private function getMatchBlocksOnAxis(axis: Number, block: Block): Array {
@@ -63,7 +65,7 @@ package ly.jamie.oiramrd {
     }
 
     private function getNextBlock(block: Block, axis: Number, step: Number): Block {
-      var pt: Point = block.position; 
+      var pt: Point = block.position.copy(); 
       if(axis == VERTICAL) {
         pt.y += step;
       } else {
@@ -77,7 +79,7 @@ package ly.jamie.oiramrd {
     }
 
     private function uniqueBlocks(blocks: Array): Array {
-      var hash: Object = {};
+      var hash: Dictionary = new Dictionary();
       for each(var blk:Block in blocks) {
         hash[blk.position.toString()] = blk;
       }

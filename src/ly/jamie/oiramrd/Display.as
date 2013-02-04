@@ -46,7 +46,6 @@ package ly.jamie.oiramrd {
 
     public function updateBlock(blk: Block): void {
         var b:MovieClip = blk.mc;
-        var o:Point = new Point(b.x, b.y);
         b.x = this.blockSize.x * blk.position.x - this.width;
         b.y = this.blockSize.y * blk.position.y - this.height;
     }
