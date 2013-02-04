@@ -21,6 +21,7 @@ package ly.jamie.oiramrd {
     public var activePill: Pill;
     public var debug: Function;
     private var clock: Number;
+    private var matcher: Matcher;
 
     /**
      * This is the main class
@@ -53,6 +54,7 @@ package ly.jamie.oiramrd {
         }
 
         this.initialize();
+        this.matcher = new Matcher(this);
     }
 
     public function toString(): String {
@@ -296,12 +298,6 @@ package ly.jamie.oiramrd {
         return this.score;
     }
 
-    private function newBlockMatcher(): BlockMatcher {
-      var bm:BlockMatcher = new BlockMatcher(this);
-      bm.trace = debug;
-      return bm;
-    }
-
     private function stopApplyingGravity(): void {
         for(var x:Number=0; x< this.width; x++) { // iterate over columns 
             for(var y:Number=this.height-1; y >=0 ; y--) {
@@ -310,6 +306,13 @@ package ly.jamie.oiramrd {
                 }
             }
         }
+    }
+
+    public function blockAt(pt: Point): Block {
+      if(pt.x < 0 || pt.x > this.mcs.length) return null;
+      if(pt.y < 0 || pt.y > this.mcs[pt.x].length) return null;
+
+      return this.mcs[pt.x][pt.y];
     }
 
     private function dropBlockAt(pt: Point): Number {
@@ -360,6 +363,27 @@ package ly.jamie.oiramrd {
       this.blockMatcher.addContactBlock(blk);
     }
 
+    public function allPositions(): Array {
+      var rtn: Array = [];
+      for(var x:Number=0; x< this.width; x++) { // iterate over columns 
+        for(var y:Number=this.height-1; y >=0 ; y--) {
+          rtn.push(new Point(x, y));
+        }
+      }
+      return rtn;
+    }
+
+    public function allBlocks(): Array {
+      var rtn: Array = [];
+      for each(var pt: Point in this.allPositions()) {
+        var block: Block = this.blockAt(pt);
+        if(block) {
+          rtn.push(block);
+        }
+      }
+      return rtn;
+    }
+
     private function isBlockThatCanFallAt(pt: Point): Boolean {
       return this.board[pt.x][pt.y] == Constants.BRD_BLOCK 
         && this.canFall( this.mcs[pt.x][pt.y] );
@@ -378,54 +402,10 @@ package ly.jamie.oiramrd {
       return numberOfBlocksFalling;
     }
 
-    private function getMatchedPointsFromFreshBlockMatcher(): Array {
-      debug("getMatchedPointsFromFreshBlockMatcher: Contact blocks: " 
-            + this.blockMatcher.getContactBlocks().length);
-      this.blockMatcher.buildSearchGrid();
-      this.blockMatcher.setMatched();
-
-      debug("getMatchedPointsFromFreshBlockMatcher: setMatched completed");
-
-      var matchedPoints: Array = this.blockMatcher.getMatchedPoints();
-      debug("getMatchedPointsFromFreshBlockMatcher Matched points: " 
-            + matchedPoints.length);
-
-      return matchedPoints;
-    }
-
-    private function handleMatchedPoints(matchedPoints: Array): void {
-      if ( matchedPoints.length <= 0 ) { return; }
-      //
-      // clear matched
-      for ( var i: Number= 0 ; i < matchedPoints.length; i ++ ) {
-          var p: Point = matchedPoints[i].block.position;
-          this.destroyBlock (p.x, p.y);
-      }
-      // @todo play a sound
-      //this.display.sound.play();
-
-      this.chainLevel ++;
-    }
-
-    private function resolveMatchedPoints(): void {
-      var matchedPoints: Array = this.getMatchedPointsFromFreshBlockMatcher();
-      this.handleMatchedPoints(matchedPoints);
-
-      debug("resolveMatchedPoints: Chain level set");
-
-      this.blockMatcher = this.newBlockMatcher();
-      this.ticksPerStep = 1; // increase speed momentarily to clear all chains
-      debug("resolveMatchedPoints: New block matcher created");
-    }
-
     /**
      * Causes all blocks that can fall due to gravity to fall by one board position.
      */
     public function applyGravity(): void {
-      if ( this.blockMatcher == null ) {
-        this.blockMatcher = this.newBlockMatcher();
-      }
-
       this.clock ++;
       debug("***********************************apply gravity CLOCK=" + this.clock);
 
@@ -440,20 +420,13 @@ package ly.jamie.oiramrd {
       }
 
       debug("There are no falling blocks--resolve");
-      this.resolveGridWithNoFallingBlocks();
-    }
-
-    private function resolveGridWithNoFallingBlocks(): void {
-      debug("resolveGridWithNoFallingBlocks start");
-      if ( this.blockMatcher.getContactBlocks().length > 0 ) {
-        debug("resolveGridWithNoFallingBlocks: There are contact points");
-        this.resolveMatchedPoints();
-      }
-      else {
-        debug("resolveGridWithNoFallingBlocks: There are no contact points. Release PILL");
+      try {
+        var matchedBlocks: Array = matcher.getAllMatchBlocks();
+        debug("applyGravity: matcher allMatchBlocks=" + matchedBlocks);
         this.nextPill();
+      } catch(ex: Error) {
+        debug("Problem matching blocks: " + ex.message);
       }
-      debug("resolveGridWithNoFallingBlocks end");
     }
 
     private function nextPill(): void {
