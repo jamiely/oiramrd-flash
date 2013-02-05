@@ -26,6 +26,7 @@ package ly.jamie.oiramrd {
     public var textfields: MovieClip;
     public var left: Number;
     public var myformat: TextFormat;
+    private var shouldShowCellNumber: Boolean = false;
 
     function Display(game:Oiramrd, root:MovieClip) {
         this.game = game;
@@ -90,6 +91,8 @@ package ly.jamie.oiramrd {
 
 
     private function createCellNumbering(): void {
+      if(! this.shouldShowCellNumber) return;
+
         var w: Number = this.width; 
         var h: Number = this.height;
 

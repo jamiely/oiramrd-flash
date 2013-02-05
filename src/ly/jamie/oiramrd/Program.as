@@ -10,6 +10,7 @@ package ly.jamie.oiramrd {
     private var oiramrd: Oiramrd;
     private var txtDebug: TextField;
     private var isPaused: Boolean = false;
+    private var mcGameOver: MovieClip = null;
 
     public function Program() {
       //this.drawBackground();
@@ -24,6 +25,8 @@ package ly.jamie.oiramrd {
     }
 
     private function debug(msg: String): void {
+      return;
+
       if(!this.txtDebug) {
         this.txtDebug = new TextField();
         this.txtDebug.defaultTextFormat = new TextFormat("_sans", 6);
@@ -111,25 +114,27 @@ package ly.jamie.oiramrd {
 
         this.clock ++;
 
-        //debug("Clock: " + this.clock + " Ticks per step: " + this.oiramrd.ticksPerStep);
-
         if ( this.oiramrd.isGameOver() ) {
+          if(this.mcGameOver) return;
+
+          this.game.visible = false;
+
+          this.mcGameOver = new MovieClip();
+          this.addChild(this.mcGameOver);
+
           debug("Game over");
-            var tf: TextField = new TextField();
-            tf.width = 200;
-            tf.height = 200;
+          var tf: TextField = new TextField();
+          tf.width = 200;
+          tf.height = 200;
+          this.mcGameOver.addChild(tf);
 
-            var tform: TextFormat = new TextFormat();
-            tform.bold = true;
-            tform.url = "http://jamie.ly";
-            tf.setTextFormat ( tform );
+          var tform: TextFormat = new TextFormat();
+          tform.bold = true;
+          tf.defaultTextFormat = tform;
+          tf.multiline = true;
+          tf.text = "Game Over.\n" + this.GetCongratulationsText(this.oiramrd.score) 
+            + "\nYour Score: " + this.oiramrd.score;
 
-            tf.multiline = true;
-            tf.text = "Game Over.\n" + this.GetCongratulationsText(this.oiramrd.score) 
-              + "\nYour Score: " + this.oiramrd.score + "\n\nangelforge.com";
-
-            this.game.parent.removeChild(this.game);
-            this.game = null;
         } else if ( this.clock % this.oiramrd.ticksPerStep == 0 )  {
           this.oiramrd.applyGravity();
         } else {

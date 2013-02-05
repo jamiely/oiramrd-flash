@@ -40,89 +40,54 @@ package ly.jamie.oiramrd{
           case "P".charCodeAt(0):
             this.onPause();
             break;
-          case "s".charCodeAt(0):
-          case "S".charCodeAt(0):
-            this.onStep();
-            break;
       }
-      //if(isPaused) return;
 
-        switch ( e.charCode ) {
-            case "g".charCodeAt(0):
-                // this.game.step();
-                // trace(this + ": stepped!");
-                 break;
-            case "n".charCodeAt(0):
-                // trace("Game = " + this.game);
-                // this.game.insertNextPill();
-                // trace(this + ": inserted new myPill");
-                //gameStart();
-                break;
-            // case "f".charCodeAt(0):
-                // trace("Virii fill");
-                // this.game.viriiFill(.1);
-                 break;
-            case "d".charCodeAt(0):
-                // trace("dump board");
-                // this.game.dumpBoard();
-                // var bm = new BlockMatcher(this.game);
-                // bm.buildSearchGrid();
-                // bm.dumpBoard();
+      switch ( e.charCode ) {
+        case "z".charCodeAt(0):
+          if ( this.game.canRotate(ap, true) ){
+            pp.counterClockwise(this.game, ap);
+            this.game.display.updatePill ( ap );
+          }
+          break;
+      }
 
-                break;
-            case "z".charCodeAt(0):
-                if ( this.game.canRotate(ap, true) ){
-                    pp.counterClockwise(this.game, ap);
-                    this.game.display.updatePill ( ap );
-                }
-                break;
-        }
+      ap = this.game.activePill;
 
-        ap = this.game.activePill;
+      if ( ap == null ) return;
 
-        if ( ap == null ) return;
+      pp = new PillPusher();
 
-        pp = new PillPusher();
-
-        switch ( e.keyCode ) {
-            case Keyboard.RIGHT:
-                if ( this.game.canMove ( ap, Constants.DIR_RIGHT ) ) {
-                    pp.right(this.game, ap);
-                    this.game.display.updatePill(ap);
-                }
-                break;
-
-            case Keyboard.LEFT:
-                if ( this.game.canMove ( ap, Constants.DIR_LEFT ) ) {
-                    pp.left(this.game, ap);
-                    this.game.display.updatePill(ap);
-                }
-                break;
-            // does not work properly
-            // case Keyboard.DOWN:
-                // if ( this.game.canMove ( ap, DIR_DOWN ) ) {
-                    // pp.down(this.game, ap);
-                    // this.game.display.updatePill(ap);
-                    // this.trace(this + ": KeyboardDown LEFT");
-                // }
-                // break;
-            case Keyboard.DOWN:
-              this.game.step();
+      switch ( e.keyCode ) {
+          case Keyboard.RIGHT:
+              if ( this.game.canMove ( ap, Constants.DIR_RIGHT ) ) {
+                  pp.right(this.game, ap);
+                  this.game.display.updatePill(ap);
+              }
               break;
-            case Keyboard.UP:
-                if ( this.game.canRotate(ap, true) ) {
-                    pp.clockwise(this.game, ap);
-                    this.game.display.updatePill(ap);
-                }
 
-                break;
-            case Keyboard.CONTROL:
-                if ( this.game.canRotate(ap, true) ){
-                    pp.counterClockwise(this.game, ap);
-                    this.game.display.updatePill ( ap );
-                }
-                break;
-        }
+          case Keyboard.LEFT:
+              if ( this.game.canMove ( ap, Constants.DIR_LEFT ) ) {
+                  pp.left(this.game, ap);
+                  this.game.display.updatePill(ap);
+              }
+              break;
+          case Keyboard.DOWN:
+            this.game.step();
+            break;
+          case Keyboard.UP:
+              if ( this.game.canRotate(ap, true) ) {
+                  pp.clockwise(this.game, ap);
+                  this.game.display.updatePill(ap);
+              }
+
+              break;
+          case Keyboard.CONTROL:
+              if ( this.game.canRotate(ap, true) ){
+                  pp.counterClockwise(this.game, ap);
+                  this.game.display.updatePill ( ap );
+              }
+              break;
+      }
     }
   }
 }
