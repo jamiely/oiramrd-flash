@@ -420,14 +420,22 @@ package ly.jamie.oiramrd {
 
 
       try {
-        var matchedBlocks: Array = matcher.getAllMatchBlocks();
-        for each(var matchedBlock: Block in matchedBlocks) {
-          this.destroyBlock(matchedBlock.position.x, matchedBlock.position.y);
-        }
-        this.nextPill();
+        this.destroyMatchedBlocks(matcher.getAllMatchBlocks());
       } catch(ex: Error) {
         debug("Problem matching blocks: " + ex.message);
       }
+    }
+
+    private function destroyMatchedBlocks(matchedBlocks: Array): void {
+      if(matchedBlocks.length == 0 ) {
+        this.nextPill();
+        return;
+      }
+
+      for each(var matchedBlock: Block in matchedBlocks) {
+        this.destroyBlock(matchedBlock.position.x, matchedBlock.position.y);
+      }
+      this.applyGravity();
     }
 
     private function nextPill(): void {

@@ -36,8 +36,8 @@ package ly.jamie.oiramrd {
           matchBlocks = matchBlocks.concat(axisBlocks);
         }
       }
-      return matchBlocks;
-      //return this.uniqueBlocks(matchBlocks);
+      //return matchBlocks;
+      return this.uniqueBlocks(matchBlocks);
     }
 
     private function getMatchBlocksOnAxis(axis: Number, block: Block): Array {
@@ -45,6 +45,7 @@ package ly.jamie.oiramrd {
       for each(var step: Number in [1, -1]) {
         rtn = rtn.concat(this.getMatchBlocksOnAxisWithStep(axis, block, step));
       }
+      rtn.push(block);
       return rtn;
     }
 
