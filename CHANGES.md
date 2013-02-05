@@ -1,5 +1,11 @@
 HISTORY
 
+v0.0.12
+=======
+* Upgraded to AS3
+* Fixed bug in matching
+* Lots of refactoring
+
 000.011
 - added game over condition
 
