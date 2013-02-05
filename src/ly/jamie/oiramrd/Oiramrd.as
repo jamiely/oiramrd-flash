@@ -286,7 +286,7 @@ package ly.jamie.oiramrd {
         var p: Point = blk.position;
         if ( blk.linkedBlock == null ) {
           var p1: Point = new Point(p.x, p.y + 1);
-            return this.validAt(p1) && this.emptyAt(p1);
+          return this.validAt(p1) && this.emptyAt(p1);
         }
 
         var p2: Point = blk.linkedBlock.position;
@@ -385,14 +385,15 @@ package ly.jamie.oiramrd {
     }
 
     private function areBlocksFalling(): Boolean {
+      debug("areBlocksFalling");
       var blocksFalling: Boolean = false;
-      for(var x:Number=0; x< this.width; x++) { // iterate over columns 
-          for(var y:Number=this.height-1; y >=0 ; y--) {
-            var pt: Point = new Point(x,y);
-            if (this.isBlockThatCanFallAt(pt)) { // block && all blocks above must fall
-              blocksFalling = blocksFalling || this.dropBlockAt(pt) > 0;
-            }
+      for(var y:Number=this.height-1; y >=0 ; y--) {
+        for(var x:Number=0; x< this.width; x++) { // iterate over columns 
+          var pt: Point = new Point(x,y);
+          if (this.isBlockThatCanFallAt(pt)) { // block && all blocks above must fall
+            blocksFalling = blocksFalling || this.dropBlockAt(pt) > 0;
           }
+        }
       }
       return blocksFalling;
     }
@@ -406,36 +407,34 @@ package ly.jamie.oiramrd {
 
       this.stopApplyingGravity();
 
-      debug("Check for falling blocks");
-      try {
-        if(this.areBlocksFalling()) {
-          // guarantees clearing only after all blocks fallen
-          // this can be changed to clear after some blocks have fallen
-          debug("There are still falling blocks.");
-          return;
-        }
-      } catch(ex: Error) {
-        debug("Problem with falling blocks: " + ex.message);
+      if(this.areBlocksFalling()) {
+        // guarantees clearing only after all blocks fallen
+        // this can be changed to clear after some blocks have fallen
+        debug("There are still falling blocks.");
+        return;
       }
 
-
-      try {
-        this.destroyMatchedBlocks(matcher.getAllMatchBlocks());
-      } catch(ex: Error) {
-        debug("Problem matching blocks: " + ex.message);
-      }
+      this.destroyMatchedBlocksOrDropPill(matcher.getAllMatchBlocks());
     }
 
-    private function destroyMatchedBlocks(matchedBlocks: Array): void {
+    private function destroyMatchedBlocksOrDropPill(matchedBlocks: Array): void {
+      debug("destroyMatchedBlocksOrDropPill");
       if(matchedBlocks.length == 0 ) {
         this.nextPill();
         return;
       }
 
       for each(var matchedBlock: Block in matchedBlocks) {
-        this.destroyBlock(matchedBlock.position.x, matchedBlock.position.y);
+        this.destroyBlockAt(matchedBlock.position);
       }
-      this.applyGravity();
+      this.repeatedlyDropFallingBricks();
+    }
+
+    private function repeatedlyDropFallingBricks(): void {
+      do {
+        this.stopApplyingGravity();
+        debug("!! destroyed blocks. blocks are falling");
+      } while(this.areBlocksFalling());
     }
 
     private function nextPill(): void {
@@ -544,6 +543,9 @@ package ly.jamie.oiramrd {
         this.display.setLevel( this.level );
     }
 
+    public function destroyBlockAt( pt:Point ): void {
+      this.destroyBlock(pt.x, pt.y);
+    }
     public function destroyBlock( x:Number, y:Number ): void {
         if ( this.board[x][y] == Constants.BRD_VIRUS ) {
             this.viriiCount --;
